@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.ResourceBundle;
 
 /**
  * This class is the launcher for the application
@@ -15,9 +16,11 @@ import java.io.IOException;
 public class C195App extends Application {
     @Override
     public void start(Stage stage) throws IOException {
+        DBAccessor dba = DBAccessor.getInstance();
+        ResourceBundle msg = dba.getMsg();
         FXMLLoader fxmlLoader = new FXMLLoader(C195App.class.getResource("LoginForm.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
-        stage.setTitle("Please Log In");
+        stage.setTitle(msg.getString("LoginTitle"));
         stage.setScene(scene);
         stage.show();
     }

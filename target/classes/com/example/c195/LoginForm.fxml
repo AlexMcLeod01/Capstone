@@ -9,20 +9,20 @@
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="276.0"
             prefWidth="383.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.c195.LoginFormController">
     <children>
-        <Label layoutX="94.0" layoutY="42.0" style="-fx-font-weight: bold;" text="Please Log In To Continue">
+        <Label layoutX="94.0" layoutY="42.0" style="-fx-font-weight: bold;" text="Please Log In To Continue" fx:id="header">
             <font>
                 <Font size="16.0"/>
             </font>
         </Label>
-        <Label layoutX="38.0" layoutY="116.0" text="Username:"/>
-        <Label layoutX="38.0" layoutY="160.0" text="Password:"/>
-        <TextField layoutX="106.0" layoutY="112.0" prefHeight="26.0" prefWidth="217.0"/>
-        <TextField layoutX="106.0" layoutY="156.0" prefHeight="26.0" prefWidth="218.0"/>
-        <Button layoutX="235.0" layoutY="227.0" mnemonicParsing="false" text="Submit"/>
-        <Button layoutX="106.0" layoutY="227.0" mnemonicParsing="false" text="Cancel" onMouseClicked="#exitClicked"/>
+        <Label layoutX="38.0" layoutY="116.0" text="Username:" fx:id="userLabel"/>
+        <Label layoutX="38.0" layoutY="160.0" text="Password:" fx:id="passLabel"/>
+        <TextField layoutX="136.0" layoutY="112.0" prefHeight="26.0" prefWidth="217.0" fx:id="userField"/>
+        <TextField layoutX="136.0" layoutY="156.0" prefHeight="26.0" prefWidth="218.0" fx:id="passField"/>
+        <Button layoutX="235.0" layoutY="227.0" mnemonicParsing="false" text="Submit" onMouseClicked="#submitClicked" fx:id="submitButton"/>
+        <Button layoutX="106.0" layoutY="227.0" mnemonicParsing="false" text="Cancel" onMouseClicked="#exitClicked" fx:id="cancelButton"/>
         <Label id="LoginErrorMessage" layoutX="106.0" layoutY="81.0" prefHeight="18.0" prefWidth="218.0"
-               text="Incorrect Username" textFill="#ff000000"/>
-        <Label layoutX="36.0" layoutY="196.0" text="Time Zone:"/>
-        <Label layoutX="106.0" layoutY="196.0" prefHeight="18.0" prefWidth="218.0" text="Central" fx:id="timeZoneDisplay"/>
+               text="Incorrect Username" visible="false" fx:id="errorMessageDisplay"/>
+        <Label layoutX="36.0" layoutY="196.0" text="Time Zone:" fx:id="timeZoneLabel"/>
+        <Label layoutX="136.0" layoutY="196.0" prefHeight="18.0" prefWidth="218.0" text="Central" fx:id="timeZoneDisplay"/>
     </children>
 </AnchorPane>
