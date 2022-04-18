@@ -56,9 +56,7 @@ public class LoginFormController {
      */
     private int checkCreds () {
         String use = userField.getText();
-        System.out.println(use);
         String pas = passField.getText();
-        System.out.println(pas);
         if (dba.userExists(use)) {
             if (dba.userPass(use, pas)) {
                 return 0;
@@ -78,6 +76,7 @@ public class LoginFormController {
         int i = checkCreds();
         switch (i) {
             case 0:
+
                 break;
             case 1:
                 errorMessageDisplay.setText(msg.getString("LoginErrorUser"));
