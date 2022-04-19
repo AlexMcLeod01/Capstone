@@ -38,7 +38,7 @@ public final class DBAccessor {
 
     /**
      * gets the timezone
-     * @return
+     * @return user's timezone setting
      */
     public ZoneId getZone() {
         return zone;
@@ -46,7 +46,7 @@ public final class DBAccessor {
 
     /**
      * gets the locale
-     * @return
+     * @return locale information
      */
     public Locale getLocal() {
         return local;
@@ -54,17 +54,16 @@ public final class DBAccessor {
 
     /**
      * gets the displayed text in user's language
-     * @return
+     * @return ResourceBundle with user's language
      */
     public ResourceBundle getMsg() { return bundle; }
 
     /**
      * Helper function to write to tracking file
-     * @param message
+     * @param message - message to append to tracking file
      */
     private void Write(String message) {
         try {
-            System.out.println("Got here, message: " + message);
             FileWriter writer = new FileWriter(loginFile, true);
             writer.write(message);
             writer.close();
@@ -75,7 +74,7 @@ public final class DBAccessor {
 
     /**
      * Checks to see if username is in database; if false, write to login_activity.txt
-     * @param user
+     * @param user - username
      * @return true if username is in database
      */
     public boolean userExists(String user) {
@@ -92,8 +91,8 @@ public final class DBAccessor {
     /**
      * Checks to see if username and password pair are in database
      * Also writes the activity to login_activity.txt
-     * @param user
-     * @param pass
+     * @param user - username
+     * @param pass - password
      * @return true if username and password match pair in database
      */
     public boolean userPass(String user, String pass) {
@@ -124,7 +123,7 @@ public final class DBAccessor {
             try {
                 loginFile.createNewFile();
             } catch (IOException e) {
-                System.out.println(e);
+                e.printStackTrace();
             }
         }
     }
