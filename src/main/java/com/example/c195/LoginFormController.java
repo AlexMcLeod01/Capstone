@@ -2,11 +2,15 @@ package com.example.c195;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
 
-import java.time.ZoneId;
+import java.io.IOException;
 import java.util.ResourceBundle;
 
 
@@ -16,8 +20,8 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class LoginFormController {
-    DBAccessor dba;
-    ResourceBundle msg;
+    private DBAccessor dba;
+    private ResourceBundle msg;
 
     //Declaring FXML elements
     @FXML
@@ -76,7 +80,17 @@ public class LoginFormController {
         int i = checkCreds();
         switch (i) {
             case 0:
-
+                Stage stage = (Stage) submitButton.getScene().getWindow();
+                try {
+                    AnchorPane root;
+                    root = (AnchorPane) FXMLLoader.load(getClass().getResource("AppointmentManagementSystem.fxml"));
+                    Scene scene = new Scene(root);
+                    stage.setTitle(msg.getString("MainTitle"));
+                    stage.setScene(scene);
+                    stage.show();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 break;
             case 1:
                 errorMessageDisplay.setText(msg.getString("LoginErrorUser"));

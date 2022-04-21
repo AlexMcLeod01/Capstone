@@ -8,24 +8,24 @@
 <?import javafx.scene.text.Font?>
 
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="270.0" prefWidth="532.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="270.0" prefWidth="532.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.c195.AMSController">
    <children>
-      <Label layoutX="126.0" layoutY="35.0" text="Appointment Management System">
+      <Label layoutX="126.0" layoutY="35.0" text="Appointment Management System" fx:id="mainHeader">
          <font>
             <Font name="System Bold" size="17.0" />
          </font>
       </Label>
-      <Label layoutX="160.0" layoutY="87.0" text="Notice: No upcoming appointments" textFill="#c41212" />
+      <Label layoutX="160.0" layoutY="87.0" text="Notice: No upcoming appointments" textFill="#c41212" fx:id="alert" />
       <TableView layoutX="80.0" layoutY="111.0" prefHeight="79.0" prefWidth="381.0">
         <columns>
-          <TableColumn prefWidth="112.79998779296875" text="Appointment ID" />
-          <TableColumn prefWidth="121.60003662109375" text="Date" />
-            <TableColumn prefWidth="145.60000000000002" text="Time" />
+          <TableColumn prefWidth="112.79998779296875" text="Appointment ID" fx:id="appointCol" />
+          <TableColumn prefWidth="121.60003662109375" text="Date" fx:id="dateCol" />
+            <TableColumn prefWidth="145.60000000000002" text="Time" fx:id="timeCol" />
         </columns>
       </TableView>
-      <Button layoutX="80.0" layoutY="204.0" mnemonicParsing="false" text="Exit" />
-      <Button layoutX="279.0" layoutY="204.0" mnemonicParsing="false" text="Appointments" />
-      <Button layoutX="389.0" layoutY="204.0" mnemonicParsing="false" text="Customers" />
-      <Button layoutX="198.0" layoutY="204.0" mnemonicParsing="false" text="Reports" />
+      <Button layoutX="80.0" layoutY="204.0" mnemonicParsing="false" text="Exit" fx:id="exitButton" onMouseClicked="#exitClicked"/>
+      <Button layoutX="279.0" layoutY="204.0" mnemonicParsing="false" text="Appointments" fx:id="appointButton" />
+      <Button layoutX="389.0" layoutY="204.0" mnemonicParsing="false" text="Customers" fx:id="customerButton" onMouseClicked="#customerClicked" />
+      <Button layoutX="198.0" layoutY="204.0" mnemonicParsing="false" text="Reports" fx:id="reportButton" />
    </children>
 </AnchorPane>
