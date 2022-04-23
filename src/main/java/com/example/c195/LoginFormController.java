@@ -22,6 +22,7 @@ import java.util.ResourceBundle;
 public class LoginFormController {
     private DBAccessor dba;
     private ResourceBundle msg;
+    private StageSwitcher switcher;
 
     //Declaring FXML elements
     @FXML
@@ -81,16 +82,7 @@ public class LoginFormController {
         switch (i) {
             case 0:
                 Stage stage = (Stage) submitButton.getScene().getWindow();
-                try {
-                    AnchorPane root;
-                    root = (AnchorPane) FXMLLoader.load(getClass().getResource("AppointmentManagementSystem.fxml"));
-                    Scene scene = new Scene(root);
-                    stage.setTitle(msg.getString("MainTitle"));
-                    stage.setScene(scene);
-                    stage.show();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                switcher.SwitchStage(stage, "AppointmentManagementSystem.fxml", msg.getString("MainTitle"));
                 break;
             case 1:
                 errorMessageDisplay.setText(msg.getString("LoginErrorUser"));
@@ -125,5 +117,6 @@ public class LoginFormController {
         timeZoneDisplay.setText(dba.getZone().toString());
         msg = dba.getMsg();
         localize();
+        switcher = StageSwitcher.getInstance();
     }
 }

@@ -1,13 +1,14 @@
 package com.example.c195;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import java.util.*;
 
 /**
  * This class is used to abstract the Database functions from the controller.
@@ -22,6 +23,8 @@ public final class DBAccessor {
     private ResourceBundle bundle;
     private SimpleDateFormat format;
     private File loginFile;
+    private ObservableList<Customer> customers;
+    private int customerID;
 
     /**
      * initializes INSTANCE as the singleton DBAccessor
@@ -36,20 +39,18 @@ public final class DBAccessor {
         return INSTANCE;
     }
 
+    /*************************************************************************************************************
+     * ************************************USER***************************************************************** *
+     * ************************************FUNCTIONS************************************************************ *
+     *************************************************************************************************************/
+
+
     /**
      * gets the timezone
      * @return user's timezone setting
      */
     public ZoneId getZone() {
         return zone;
-    }
-
-    /**
-     * gets the locale
-     * @return locale information
-     */
-    public Locale getLocal() {
-        return local;
     }
 
     /**
@@ -108,11 +109,78 @@ public final class DBAccessor {
         }
     }
 
+    /*************************************************************************************************************
+     *******************************************CUSTOMER**********************************************************
+     *******************************************FUNCTIONS*********************************************************
+     *************************************************************************************************************/
+
+    private ObservableList<Customer> createExampleCustomerData() {
+        List<Customer> cust = new ArrayList<>();
+        ObservableList<Customer> customers = FXCollections.observableList(cust);
+        Customer c1 = new Customer(getNewCustomerID(), "A", "123 Main St", "54536", "+1(850)678-5018", "Florida", "USA");
+        Customer c2 = new Customer(getNewCustomerID(), "B", "124 Main St", "54536", "+1(850)678-5019", "Florida", "USA");
+        Customer c3 = new Customer(getNewCustomerID(), "C", "125 Main St", "54536", "+1(850)678-5020", "Florida", "USA");
+        Customer c4 = new Customer(getNewCustomerID(), "D", "126 Main St", "54536", "+1(850)678-5021", "Florida", "USA");
+        Customer c5 = new Customer(getNewCustomerID(), "E", "127 Main St", "54536", "+1(850)678-5022", "Florida", "USA");
+        customers.add(c1);
+        customers.add(c2);
+        customers.add(c3);
+        customers.add(c4);
+        customers.add(c5);
+        return customers;
+    }
+
+    /**
+     * This method returns an observable list of Customer objects
+     * from database information
+     * @return
+     */
+    public ObservableList<Customer> getAllCustomers() {
+        return customers;
+    }
+
+    /**
+     * This method deletes a Customer from the database
+     * Should also delete any appointments for Customer
+     * @param customer A Customer object
+     */
+    public void deleteCustomer(Customer customer) {
+        customers.remove(customer);
+    }
+
+    /**
+     * This method adds a Customer to the database
+     * @param customer a Customer object
+     */
+    public void addCustomer(Customer customer) {
+        customers.add(customer);
+    }
+
+    public void updateCustomer(Customer customer) {
+        customers.set(customer.getID(), customer);
+    }
+
+    /**
+     * This method generates a new customer ID every time it is called
+     * so that customer ID never gets reused. Not all generated IDs will
+     * necessarily be used
+     * @return customerID
+     */
+    public int getNewCustomerID() {
+        int i = customerID;
+        customerID++;
+        return i;
+    }
+
+
+
     /**
      * The constructor should eventually initialize the database connection
      * and any global data that needs to be passed around
      */
     public DBAccessor () {
+        customers = createExampleCustomerData();
+        customerID = 1;
         zone = ZoneId.systemDefault();
         local = Locale.getDefault();
         bundle = ResourceBundle.getBundle("com.example.c195/MessagesBundle", local);

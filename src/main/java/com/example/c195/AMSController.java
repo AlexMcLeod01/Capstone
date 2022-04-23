@@ -22,6 +22,7 @@ import java.util.ResourceBundle;
 public class AMSController {
     private DBAccessor dba;
     private ResourceBundle msg;
+    private StageSwitcher switcher;
 
     //Declare FXML elements
     @FXML private Button exitButton;
@@ -45,16 +46,7 @@ public class AMSController {
     @FXML
     private void customerClicked() {
         Stage stage = (Stage) customerButton.getScene().getWindow();
-        try {
-            AnchorPane root;
-            root = FXMLLoader.load(getClass().getResource("CustomerRecords.fxml"));
-            Scene scene = new Scene(root);
-            stage.setTitle(msg.getString("CustomerTitle"));
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        switcher.SwitchStage(stage, "CustomerRecords.fxml", msg.getString("CustomerTitle"));
     }
 
     /**
@@ -81,5 +73,6 @@ public class AMSController {
         dba = DBAccessor.getInstance();
         msg = dba.getMsg();
         localize();
+        switcher = StageSwitcher.getInstance();
     }
 }
