@@ -2,15 +2,11 @@ package com.example.c195;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.util.ResourceBundle;
 
 
@@ -101,7 +97,7 @@ public class LoginFormController {
     @FXML
     private void localize() {
         submitButton.setText(msg.getString("LoginSubmit"));
-        cancelButton.setText(msg.getString("LoginCancel"));
+        cancelButton.setText(msg.getString("Cancel"));
         timeZoneLabel.setText(msg.getString("LoginZone"));
         userLabel.setText(msg.getString("LoginUser"));
         passLabel.setText(msg.getString("LoginPass"));

@@ -1,14 +1,15 @@
 package com.example.c195;
 
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.util.ResourceBundle;
 
 /**
@@ -72,6 +73,33 @@ public class CustomerController {
     }
 
     /**
+     * A ChangeListener for the Country ComboBox. It was originally in the setUpDropMenu()
+     * function, but was needed in the clearForm() function as well to remove errors
+     */
+    private final ChangeListener listener = (observableValue, old, now) -> {
+        if(now.equals("USA")) {
+            firstLevelCombo.getItems().clear();
+            firstLevelCombo.getItems().addAll("Florida", "Utah", "Washington", "Oregon", "Texas", "New York", "California");
+        } else if (now.equals("France")) {
+            firstLevelCombo.getItems().clear();
+            firstLevelCombo.getItems().addAll("Brittany", "Normandy", "Occitania", "Centre-Val de Loire");
+        } else {
+            firstLevelCombo.getItems().clear();
+            firstLevelCombo.getItems().addAll("Ontario", "Quebec", "New Brunswick",  "Nova Scotia");
+        }
+    };
+
+    /**
+     * This is a helper function to set up the drop menu in the add customer functionality
+     */
+    private void setUpDropMenu() {
+        //Populate Combo Boxes
+        countryCombo.getItems().clear();
+        countryCombo.getItems().addAll("USA", "France", "Canada");
+        countryCombo.getSelectionModel().selectedItemProperty().addListener(listener);
+    }
+
+    /**
      * This method activates the form below the table with nothing in the fields
      */
     @FXML private void addClicked() {
@@ -82,6 +110,7 @@ public class CustomerController {
         phoneField.setDisable(false);
         countryCombo.setDisable(false);
         firstLevelCombo.setDisable(false);
+        setUpDropMenu();
         saveButton.setDisable(false);
     }
 
@@ -111,6 +140,7 @@ public class CustomerController {
         countryCombo.setDisable(false);
         firstLevelCombo.setDisable(false);
         saveButton.setDisable(false);
+        setUpDropMenu();
         setFormState();
     }
 
@@ -118,12 +148,19 @@ public class CustomerController {
      * Deletes the Customer record if there are no attached appointments
      */
     @FXML private void deleteClicked() {
-        Customer customer = custTable.getSelectionModel().getSelectedItem();
-        if (true) { //This if statement should be a call to a pop-up asking for affirmation
-            dba.deleteCustomer(customer);
-            customers = dba.getAllCustomers();
-            custTable.getItems().setAll(customers); //Additional statement should be added to update the database
+        dba.setSelectedCustomer(custTable.getSelectionModel().getSelectedItem());
+        Stage stage = new Stage();
+        FXMLLoader fxmlLoader = new FXMLLoader(C195App.class.getResource("ConfirmDelete.fxml"));
+        try {
+            Scene scene = new Scene(fxmlLoader.load());
+            stage.setTitle(msg.getString("ConfirmDelete"));
+            stage.setScene(scene);
+            stage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        customers = dba.getAllCustomers();
+        custTable.getItems().setAll(customers);
     }
 
     /**
@@ -131,31 +168,32 @@ public class CustomerController {
      * @return true if everything is filled out
      */
     private boolean isFormValid() {
+        boolean valid = true;
         if (nameField.getText().isEmpty()) {
             nameField.setPromptText(msg.getString("Required"));
-            return false;
+            valid = false;
         }
         if (addressField.getText().isEmpty()) {
             addressField.setPromptText(msg.getString("Required"));
-            return false;
+            valid = false;
         }
         if (postalField.getText().isEmpty()) {
             postalField.setPromptText(msg.getString("Required"));
-            return false;
+            valid = false;
         }
         if (phoneField.getText().isEmpty()) {
             phoneField.setPromptText(msg.getString("Required"));
-            return false;
+            valid = false;
         }
         if (firstLevelCombo.getSelectionModel().isEmpty()) {
             firstLevelCombo.setPromptText(msg.getString("Required"));
-            return false;
+            valid = false;
         }
         if (countryCombo.getSelectionModel().isEmpty()) {
             countryCombo.setPromptText(msg.getString("Required"));
-            return false;
+            valid = false;
         }
-        return true;
+        return valid;
     }
 
     private Customer getFormState() {
@@ -171,15 +209,53 @@ public class CustomerController {
         return customer;
     }
 
+    private void clearForm() {
+        nameField.clear();
+        nameField.setDisable(true);
+        addressField.clear();
+        addressField.setDisable(true);
+        postalField.clear();
+        postalField.setDisable(true);
+        phoneField.clear();
+        phoneField.setDisable(true);
+        countryCombo.setDisable(true);
+        firstLevelCombo.setDisable(true);
+        countryCombo.getSelectionModel().selectedItemProperty().removeListener(listener);
+        countryCombo.getItems().clear();
+        firstLevelCombo.getItems().clear();
+        saveButton.setDisable(true);
+    }
+
+    /**
+     * This is a helper function to search through the customers on the table
+     * @param customerID id to search for
+     * @return a customer object of the original customer of that ID
+     */
+    private Customer searchCustomers(int customerID) {
+        Customer customer = new Customer(-1, "a", "a", "a", "a", "a", "a");
+        for (Customer allCustomers : this.customers) {
+            if (allCustomers.getID() == customerID) {
+                customer = allCustomers;
+            }
+        }
+        return customer;
+    }
+
     /**
      * Saves the Customer record if no errors in the fields
      */
     @FXML private void saveClicked() {
         if (isFormValid()) {
             Customer customer = getFormState();
-            dba.addCustomer(customer);
+            Customer customerOrig = searchCustomers(customer.getID());
+            if(customerOrig.getID() != -1 && customers.contains(customerOrig)) {
+                dba.updateCustomer(customerOrig, customer);
+            } else {
+                dba.addCustomer(customer);
+            }
             customers = dba.getAllCustomers();
             custTable.getItems().setAll(customers);
+            clearForm();
         }
     }
 
@@ -210,28 +286,6 @@ public class CustomerController {
     }
 
     /**
-     * This is a helper function to set up the drop menu in the add customer functionality
-     * Uses a lambda function inside the .addListener() call to create a new ChangeListener
-     */
-    private void setUpDropMenuListener() {
-        //Populate Combo Boxes
-        countryCombo.getItems().clear();
-        countryCombo.getItems().addAll("USA", "France", "Canada");
-        countryCombo.getSelectionModel().selectedItemProperty().addListener((observableValue, old, now) -> {
-            if(now.equals("USA")) {
-                firstLevelCombo.getItems().clear();
-                firstLevelCombo.getItems().addAll("Florida", "Utah", "Washington", "Oregon", "Texas", "New York", "California");
-            } else if (now.equals("France")) {
-                firstLevelCombo.getItems().clear();
-                firstLevelCombo.getItems().addAll("Brittany", "Normandy", "Occitania", "Centre-Val de Loire");
-            } else {
-                firstLevelCombo.getItems().clear();
-                firstLevelCombo.getItems().addAll("Ontario", "Quebec", "New Brunswick",  "Nova Scotia");
-            }
-        });
-    }
-
-    /**
      * Gets an instance of the DBAccessor for various operations and calls localize() to translate the GUI
      */
     @FXML private void initialize() {
@@ -249,6 +303,5 @@ public class CustomerController {
         custFLDCol.setCellValueFactory(new PropertyValueFactory<Customer, String>("division"));
         custCountryCol.setCellValueFactory(new PropertyValueFactory<Customer, String>("country"));
         custTable.getItems().setAll(customers);
-        setUpDropMenuListener();
     }
 }

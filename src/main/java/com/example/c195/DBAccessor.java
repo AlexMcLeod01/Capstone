@@ -25,6 +25,7 @@ public final class DBAccessor {
     private File loginFile;
     private ObservableList<Customer> customers;
     private int customerID;
+    private Customer selectedCustomer;
 
     /**
      * initializes INSTANCE as the singleton DBAccessor
@@ -117,11 +118,11 @@ public final class DBAccessor {
     private ObservableList<Customer> createExampleCustomerData() {
         List<Customer> cust = new ArrayList<>();
         ObservableList<Customer> customers = FXCollections.observableList(cust);
-        Customer c1 = new Customer(getNewCustomerID(), "A", "123 Main St", "54536", "+1(850)678-5018", "Florida", "USA");
-        Customer c2 = new Customer(getNewCustomerID(), "B", "124 Main St", "54536", "+1(850)678-5019", "Florida", "USA");
-        Customer c3 = new Customer(getNewCustomerID(), "C", "125 Main St", "54536", "+1(850)678-5020", "Florida", "USA");
-        Customer c4 = new Customer(getNewCustomerID(), "D", "126 Main St", "54536", "+1(850)678-5021", "Florida", "USA");
-        Customer c5 = new Customer(getNewCustomerID(), "E", "127 Main St", "54536", "+1(850)678-5022", "Florida", "USA");
+        Customer c1 = new Customer(this.getNewCustomerID(), "A", "123 Main St", "54536", "+1(850)678-5018", "Florida", "USA");
+        Customer c2 = new Customer(this.getNewCustomerID(), "B", "124 Main St", "54536", "+1(850)678-5019", "Florida", "USA");
+        Customer c3 = new Customer(this.getNewCustomerID(), "C", "125 Main St", "54536", "+1(850)678-5020", "Florida", "USA");
+        Customer c4 = new Customer(this.getNewCustomerID(), "D", "126 Main St", "54536", "+1(850)678-5021", "Florida", "USA");
+        Customer c5 = new Customer(this.getNewCustomerID(), "E", "127 Main St", "54536", "+1(850)678-5022", "Florida", "USA");
         customers.add(c1);
         customers.add(c2);
         customers.add(c3);
@@ -156,8 +157,29 @@ public final class DBAccessor {
         customers.add(customer);
     }
 
-    public void updateCustomer(Customer customer) {
-        customers.set(customer.getID(), customer);
+    /**
+     * Replaces the customer object with second customer object
+     * @param customer1 to replace
+     * @param customer2 object to replace above
+     */
+    public void updateCustomer(Customer customer1, Customer customer2) {
+        customers.set(customers.indexOf(customer1), customer2);
+    }
+
+    /**
+     * sets the selectedCustomer to given customer
+     * @param customer
+     */
+    public void setSelectedCustomer(Customer customer) {
+        this.selectedCustomer = customer;
+    }
+
+    /**
+     * gets the selectedCustomer
+     * @return selectedCustomer
+     */
+    public Customer getSelectedCustomer() {
+        return this.selectedCustomer;
     }
 
     /**
@@ -167,8 +189,8 @@ public final class DBAccessor {
      * @return customerID
      */
     public int getNewCustomerID() {
-        int i = customerID;
-        customerID++;
+        int i = this.customerID;
+        this.customerID++;
         return i;
     }
 
@@ -179,8 +201,8 @@ public final class DBAccessor {
      * and any global data that needs to be passed around
      */
     public DBAccessor () {
-        customers = createExampleCustomerData();
         customerID = 1;
+        customers = createExampleCustomerData();
         zone = ZoneId.systemDefault();
         local = Locale.getDefault();
         bundle = ResourceBundle.getBundle("com.example.c195/MessagesBundle", local);
