@@ -24,7 +24,7 @@
         </columns>
       </TableView>
       <Button layoutX="80.0" layoutY="204.0" mnemonicParsing="false" text="Exit" fx:id="exitButton" onMouseClicked="#exitClicked"/>
-      <Button layoutX="279.0" layoutY="204.0" mnemonicParsing="false" text="Appointments" fx:id="appointButton" />
+      <Button layoutX="279.0" layoutY="204.0" mnemonicParsing="false" text="Appointments" fx:id="appointButton" onMouseClicked="#appointmentClicked" />
       <Button layoutX="389.0" layoutY="204.0" mnemonicParsing="false" text="Customers" fx:id="customerButton" onMouseClicked="#customerClicked" />
       <Button layoutX="198.0" layoutY="204.0" mnemonicParsing="false" text="Reports" fx:id="reportButton" />
    </children>

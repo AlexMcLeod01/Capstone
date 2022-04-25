@@ -3,15 +3,11 @@ package com.example.c195;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.util.ResourceBundle;
 
 /**
@@ -43,10 +39,24 @@ public class AMSController {
         Platform.exit();
     }
 
+    /**
+     * This method changes the screen to the Customer records screen when
+     * the Customers button is clicked
+     */
     @FXML
     private void customerClicked() {
         Stage stage = (Stage) customerButton.getScene().getWindow();
         switcher.SwitchStage(stage, "CustomerRecords.fxml", msg.getString("CustomerTitle"));
+    }
+
+    /**
+     * This method changes the screen to the Appointment Records screen
+     * when the Appointments button is clicked
+     */
+    @FXML
+    private void appointmentClicked() {
+        Stage stage = (Stage) appointButton.getScene().getWindow();
+        switcher.SwitchStage(stage, "AppointmentRecords.fxml", msg.getString("AppointmentTitle"));
     }
 
     /**
@@ -66,7 +76,7 @@ public class AMSController {
     }
 
     /**
-     * This method initializes data that should be visible
+     * This method initializes data that needs to be accessed
      */
     @FXML
     private void initialize() {

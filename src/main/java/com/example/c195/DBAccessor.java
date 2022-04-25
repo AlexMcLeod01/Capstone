@@ -26,6 +26,10 @@ public final class DBAccessor {
     private ObservableList<Customer> customers;
     private int customerID;
     private Customer selectedCustomer;
+    private String currentUser;
+    private int appointmentID;
+    private ObservableList<Appointments> appointments;
+
 
     /**
      * initializes INSTANCE as the singleton DBAccessor
@@ -40,10 +44,10 @@ public final class DBAccessor {
         return INSTANCE;
     }
 
-    /*************************************************************************************************************
-     * ************************************USER***************************************************************** *
-     * ************************************FUNCTIONS************************************************************ *
-     *************************************************************************************************************/
+    /*********************************************************************************************************
+     ************************************USER*****************************************************************
+     ************************************FUNCTIONS************************************************************
+     */
 
 
     /**
@@ -102,12 +106,21 @@ public final class DBAccessor {
         if (user.equals("Admin") && pass.equals("12345")) {
             String mes = "\nSuccessful Login:\nUsername: " + user + "\nDate: " + format.format(date);
             Write(mes);
+            currentUser = user;
             return true;
         } else {
             String err = "\nFailed Login Attempt:\nUsername: " + user + "\nDate: " + format.format(date);
             Write(err);
             return false;
         }
+    }
+
+    /**
+     * This is a getter for the currentUser who is logged in
+     * @return currentUser
+     */
+    public String getCurrentUser() {
+        return currentUser;
     }
 
     /*************************************************************************************************************
@@ -168,7 +181,7 @@ public final class DBAccessor {
 
     /**
      * sets the selectedCustomer to given customer
-     * @param customer
+     * @param customer the selected customer
      */
     public void setSelectedCustomer(Customer customer) {
         this.selectedCustomer = customer;
@@ -194,13 +207,65 @@ public final class DBAccessor {
         return i;
     }
 
+    /*******************************************************************************************************
+     ******************************************APPOINTMENT**************************************************
+     ******************************************FUNCTIONS****************************************************
+     *******************************************************************************************************
+     *******************************************************************************************************/
 
+    private ObservableList<Appointments> createExampleAppointmentData() {
+        List<Appointments> appoint = new ArrayList<>();
+        ObservableList<Appointments> appointments = FXCollections.observableList(appoint);
+        Appointments a1 = new Appointments(this.getNewAppointmentID(), "A", "Sales", "54* by 63*", "04/05/2023 at 0930", "04/05/2023 at 1000", 2, 1, 3);
+        Appointments a2= new Appointments(this.getNewAppointmentID(), "B", "Delivery", "Longhorns", "07/05/2022 at 1030", "07/05/2022 at 1130", 1, 2, 4);
+        Appointments a3 = new Appointments(this.getNewAppointmentID(), "C", "Sales", "Dark Island Hotel", "06/12/2022 at 0900", "06/12/2022 at 1000", 3, 2, 1);
+        appointments.add(a1);
+        appointments.add(a2);
+        appointments.add(a3);
+        return appointments;
+    }
+
+    /**
+     * This method gets all the appointments from the database and turns them into an ObservableList
+     * and returns that List
+     * @return Observable List of all appointments
+     */
+    public ObservableList<Appointments> getAllAppointments() {
+        return appointments;
+    }
+
+    /**
+     * This method removes the selected appointment from the database
+     * @param appointment an Appointments object
+     */
+    public void deleteAppointment(Appointments appointment) {
+        appointments.remove(appointment);
+    }
+
+    /**
+     * Generates a new appointment ID and returns the old one
+     * @return an unused appointment ID
+     */
+    public int getNewAppointmentID() {
+        int i = this.appointmentID;
+        this.appointmentID++;
+        return i;
+
+    }
+
+
+    /*******************************************************************************************************
+     ******************************************DBACCESSOR***************************************************
+     ******************************************CONSTRUCTOR**************************************************
+     *******************************************************************************************************/
 
     /**
      * The constructor should eventually initialize the database connection
      * and any global data that needs to be passed around
      */
     public DBAccessor () {
+        appointmentID=1;
+        appointments = createExampleAppointmentData();
         customerID = 1;
         customers = createExampleCustomerData();
         zone = ZoneId.systemDefault();
