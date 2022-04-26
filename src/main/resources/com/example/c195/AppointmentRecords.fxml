@@ -56,8 +56,8 @@
       <ComboBox fx:id="eTimeCombo" disable="true" layoutX="764.0" layoutY="356.0" prefWidth="150.0" />
       <Label fx:id="customerLabel" layoutX="670.0" layoutY="402.0" text="Customer ID:" />
       <ComboBox fx:id="customerCombo" disable="true" layoutX="764.0" layoutY="398.0" prefWidth="150.0" />
-      <Label fx:id="userLabel" layoutX="670.0" layoutY="446.0" text="User ID:" />
-      <ComboBox fx:id="userCombo" disable="true" layoutX="764.0" layoutY="442.0" prefWidth="150.0" />
-      <Button fx:id="saveButton" disable="true" layoutX="449.0" layoutY="541.0" mnemonicParsing="false" text="Save" />
+      <!--<Label fx:id="userLabel" layoutX="670.0" layoutY="446.0" text="User ID:" />
+      <ComboBox fx:id="userCombo" disable="true" layoutX="764.0" layoutY="442.0" prefWidth="150.0" />-->
+      <Button fx:id="saveButton" disable="true" layoutX="449.0" layoutY="541.0" mnemonicParsing="false" text="Save" onMouseClicked="#saveClicked" />
    </children>
 </AnchorPane>

@@ -3,10 +3,13 @@ package com.example.c195;
 
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.util.ResourceBundle;
 
 /**
@@ -63,7 +66,7 @@ public class AppointmentController {
     @FXML private ComboBox sTimeCombo;
     @FXML private ComboBox eTimeCombo;
     @FXML private ComboBox customerCombo;
-    @FXML private ComboBox userCombo;
+    //@FXML private ComboBox userCombo;
 
     //Date Picker
     @FXML private DatePicker sDateSelector;
@@ -97,15 +100,31 @@ public class AppointmentController {
         sTimeCombo.setDisable(disabled);
         eTimeCombo.setDisable(disabled);
         customerCombo.setDisable(disabled);
-        userCombo.setDisable(disabled);
+        //userCombo.setDisable(disabled);
         saveButton.setDisable(disabled);
+    }
+
+    /**
+     * Populate the combo boxes with data from database
+     */
+    @FXML private void populateCombos() {
+        ObservableList<Contact> contacts = dba.getContactList();
+        contactCombo.getItems().clear();
+        for (Contact c : contacts)
+            contactCombo.getItems().add(c.getName());
+        ObservableList<Customer> customers = dba.getAllCustomers();
+        customerCombo.getItems().clear();
+        for (Customer c : customers)
+            customerCombo.getItems().add(c.getName());
     }
 
     /**
      * The user has clicked Add button, so turn on form
      */
     @FXML private void addClicked() {
+        appointmentField.setText(Integer.toString(dba.getNewAppointmentID()));
         disableFields(false);
+        populateCombos();
     }
 
     /**
@@ -117,9 +136,26 @@ public class AppointmentController {
     }
 
     @FXML private void deleteClicked() {
-        dba.deleteAppointment(appointTable.getSelectionModel().getSelectedItem());
+        dba.setSelectedAppointment(appointTable.getSelectionModel().getSelectedItem());
+        Stage stage = new Stage();
+        FXMLLoader fxmlLoader = new FXMLLoader(C195App.class.getResource("ConfirmAppointmentDelete.fxml"));
+        try {
+            Scene scene = new Scene(fxmlLoader.load());
+            stage.setTitle(msg.getString("ConfirmDelete"));
+            stage.setScene(scene);
+            stage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         appointments = dba.getAllAppointments();
         appointTable.getItems().setAll(appointments);
+    }
+
+    /**
+     * This method saves the form data when clicked, if form data is valid, or error message is displayed if not
+     */
+    @FXML private void saveClicked() {
+        disableFields(true);
     }
 
     /**
@@ -151,7 +187,7 @@ public class AppointmentController {
         sTimeLabel.setText(msg.getString("StartTime") + ":");
         eTimeLabel.setText(msg.getString("EndTime") + ":");
         customerLabel.setText(msg.getString("CustID") + ":");
-        userLabel.setText(msg.getString("UserID") + ":");
+        //userLabel.setText(msg.getString("UserID") + ":");
         headingLabel.setText(msg.getString("AppointHeading"));
     }
     /**

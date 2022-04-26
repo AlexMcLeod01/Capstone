@@ -8,33 +8,33 @@ import javafx.stage.Stage;
 import java.util.ResourceBundle;
 
 /**
- * A controller for the Confirm Delete pop up window
+ * This class controls the pop up window: ConfirmAppointmentDelete
  * @author Harold Alex McLeod
  * @version 1.0
  */
-public class ConfirmDeleteController {
+public class ConfirmAppointmentDeleteController {
     DBAccessor dba;
     ResourceBundle msg;
 
     //Stuff for the pop up
     //Buttons for the pop up
-    @FXML private Button confirmButton;
+    @FXML
+    private Button confirmButton;
     @FXML private Button cancelButton;
     //Labels
     @FXML private Label confirmLabel;
-    @FXML private Label warningLabel;
 
     /**
      * This method deletes the customer selected
      */
     @FXML private void confirmClicked() {
-        dba.deleteCustomer(dba.getSelectedCustomer());
+        dba.deleteAppointment(dba.getSelectedAppointment());
         Stage stage = (Stage) confirmButton.getScene().getWindow();
         stage.close();
     }
 
     /**
-     * This method closes the pop up without deleting
+     * Closes out of window without deleting Appointment
      */
     @FXML private void cancelClicked() {
         Stage stage = (Stage) cancelButton.getScene().getWindow();
@@ -42,13 +42,18 @@ public class ConfirmDeleteController {
     }
 
 
+    /**
+     * Initializes all the data to desired values
+     */
     @FXML private void initialize() {
+        //Get instance of DBAccessor and the ResourceBundle
         dba = DBAccessor.getInstance();
         msg = dba.getMsg();
 
+        //Localize messages
         confirmButton.setText(msg.getString("Confirm"));
         cancelButton.setText(msg.getString("Cancel"));
-        confirmLabel.setText(msg.getString("SureDelete"));
-        warningLabel.setText(msg.getString("WarnDelete"));
+        confirmLabel.setText(msg.getString("SureDeleteAppointment") + "\nAppointment ID: " + dba.getSelectedAppointment().getAppointmentID()
+            + "\nType: " + dba.getSelectedAppointment().getType());
     }
 }

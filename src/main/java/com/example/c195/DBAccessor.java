@@ -1,6 +1,8 @@
 package com.example.c195;
 
+import javafx.beans.InvalidationListener;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 
 import java.io.File;
@@ -18,17 +20,21 @@ import java.util.*;
  * @version 1.0
  */
 public final class DBAccessor {
+    //Login screen variables
     private ZoneId zone;
     private Locale local;
     private ResourceBundle bundle;
     private SimpleDateFormat format;
     private File loginFile;
+    //Customer Screen variables
     private ObservableList<Customer> customers;
     private int customerID;
     private Customer selectedCustomer;
     private String currentUser;
+    //Appointment Screen variables
     private int appointmentID;
     private ObservableList<Appointments> appointments;
+    private Appointments selectedAppointment;
 
 
     /**
@@ -216,9 +222,9 @@ public final class DBAccessor {
     private ObservableList<Appointments> createExampleAppointmentData() {
         List<Appointments> appoint = new ArrayList<>();
         ObservableList<Appointments> appointments = FXCollections.observableList(appoint);
-        Appointments a1 = new Appointments(this.getNewAppointmentID(), "A", "Sales", "54* by 63*", "04/05/2023 at 0930", "04/05/2023 at 1000", 2, 1, 3);
-        Appointments a2= new Appointments(this.getNewAppointmentID(), "B", "Delivery", "Longhorns", "07/05/2022 at 1030", "07/05/2022 at 1130", 1, 2, 4);
-        Appointments a3 = new Appointments(this.getNewAppointmentID(), "C", "Sales", "Dark Island Hotel", "06/12/2022 at 0900", "06/12/2022 at 1000", 3, 2, 1);
+        Appointments a1 = new Appointments(this.getNewAppointmentID(), "A", "Sales", "54* by 63*", "Marketing", "04/05/2023 at 0930", "04/05/2023 at 1000", 2, 1, 3);
+        Appointments a2= new Appointments(this.getNewAppointmentID(), "B", "Delivery", "Longhorns", "Delivery", "07/05/2022 at 1030", "07/05/2022 at 1130", 1, 2, 4);
+        Appointments a3 = new Appointments(this.getNewAppointmentID(), "C", "Sales", "Dark Island Hotel", "Sales", "06/12/2022 at 0900", "06/12/2022 at 1000", 3, 2, 1);
         appointments.add(a1);
         appointments.add(a2);
         appointments.add(a3);
@@ -243,6 +249,22 @@ public final class DBAccessor {
     }
 
     /**
+     * Setter for selectedAppointment property
+     * @param appointment current selection
+     */
+    public void setSelectedAppointment(Appointments appointment) {
+        this.selectedAppointment = appointment;
+    }
+
+    /**
+     * Getter for selectedAppointment property
+     * @return selectedAppointment
+     */
+    public Appointments getSelectedAppointment() {
+        return this.selectedAppointment;
+    }
+
+    /**
      * Generates a new appointment ID and returns the old one
      * @return an unused appointment ID
      */
@@ -251,6 +273,18 @@ public final class DBAccessor {
         this.appointmentID++;
         return i;
 
+    }
+
+    public ObservableList<Contact> getContactList() {
+        List<Contact> contact = new ArrayList<>();
+        ObservableList<Contact> contacts = FXCollections.observableList(contact);
+        Contact c1 = new Contact(1, "Yue");
+        Contact c2 = new Contact(2, "Spock");
+        Contact c3 = new Contact(3, "Yoda");
+        contacts.add(c1);
+        contacts.add(c2);
+        contacts.add(c3);
+        return contacts;
     }
 
 

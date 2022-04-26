@@ -10,6 +10,7 @@ public class Appointments {
     private String title;
     private String description;
     private String location;
+    private String type;
     private String start; //This property is a String but must be converted to DATETIME type when stored in database
     private String end; //See above
     private int customerID; //This should correspond to a Customer object's customer ID
@@ -161,22 +162,36 @@ public class Appointments {
     }
 
     /**
+     * Getter for type
+     * @return String value of type
+     */
+    public String getType() { return this.type; }
+
+    /**
+     * Setter for type
+     * @param type String type of appointment
+     */
+    public void setType(String type) { this.type = type; }
+
+    /**
      * Constructor for Appointment object
      * @param appointID integer identifying Appointment object
      * @param title String name of Appointment
      * @param desc String explanation of Appointment purpose
      * @param loc String location of Appointment
+     * @param type Type of appointment
      * @param start String representation of datetime start
      * @param end String representation of datetime end
      * @param custID int ID of related Customer object
      * @param userID int ID of user
      * @param contactID int ID of contact to meet customer
      */
-    public Appointments(int appointID, String title, String desc, String loc, String start, String end, int custID, int userID, int contactID) {
+    public Appointments(int appointID, String title, String desc, String loc, String type, String start, String end, int custID, int userID, int contactID) {
         setAppointmentID(appointID);
         setTitle(title);
         setDescription(desc);
         setLocation(loc);
+        setType(type);
         setStart(start);
         setEnd(end);
         setCustomerID(custID);
