@@ -10,6 +10,10 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
 import java.util.ResourceBundle;
 
 /**
@@ -19,10 +23,16 @@ import java.util.ResourceBundle;
  */
 public class AppointmentController {
     //Model stuff
-    DBAccessor dba;
-    ResourceBundle msg;
-    StageSwitcher switcher;
-    ObservableList<Appointments> appointments;
+    private DBAccessor dba;
+    private ResourceBundle msg;
+    private StageSwitcher switcher;
+    private ObservableList<Appointments> appointments;
+
+    //List of all the available times in EST 2400 hr format
+    private List<String> times = Arrays.asList("0800", "0830", "0900", "0930", "1000", "1030", "1100", "1130", "1200", "1230",
+            "1300", "1330", "1400", "1430", "1500", "1530", "1600", "1630", "1700", "1730", "1800", "1830",
+            "1900", "1930", "2000", "2030", "2100", "2130", "2200");
+
 
     //FXML stuff
     //Table View
@@ -106,6 +116,8 @@ public class AppointmentController {
 
     /**
      * Populate the combo boxes with data from database
+     * And the datepicker with future dates
+     * Implemented through a lambda function because the callback function is quite messy otherwise
      */
     @FXML private void populateCombos() {
         ObservableList<Contact> contacts = dba.getContactList();
@@ -116,6 +128,19 @@ public class AppointmentController {
         customerCombo.getItems().clear();
         for (Customer c : customers)
             customerCombo.getItems().add(c.getName());
+        sTimeCombo.getItems().clear();
+        sTimeCombo.getItems().addAll(times);
+        eTimeCombo.getItems().clear();
+        eTimeCombo.getItems().addAll(times);
+        //Disable unsuitable (past) dates for appointments
+        sDateSelector.setDayCellFactory(appointmentDayPicker -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                // < 0 to put all appointments starting at least today
+                setDisable(empty || date.compareTo(LocalDate.now()) < 0);
+            }
+        });
     }
 
     /**
@@ -127,12 +152,29 @@ public class AppointmentController {
         populateCombos();
     }
 
+    @FXML private void setFields() {
+        Appointments selected = appointTable.getSelectionModel().getSelectedItem();
+        appointmentField.setText(Integer.toString(selected.getAppointmentID()));
+        titleField.setText(selected.getTitle());
+        descriptionField.setText(selected.getDescription());
+        locationField.setText(selected.getLocation());
+        typeField.setText(selected.getType());
+        contactCombo.setValue(dba.getContactByID(selected.getContactID()).getName());
+        sDateSelector.setValue(LocalDate.parse(selected.getStart().substring(0, 10), DateTimeFormatter.ofPattern("MM-dd-yyyy")));
+        sTimeCombo.setValue(selected.getStart());
+        eTimeCombo.setValue(selected.getEnd());
+        customerCombo.setValue(dba.getCustomerByID(selected.getCustomerID()).getName());
+
+    }
+
     /**
      * The user has clicked Update button, so turn on form
      * and fill it out with selected appointment
      */
     @FXML private void updateClicked() {
         disableFields(false);
+        populateCombos();
+        setFields();
     }
 
     @FXML private void deleteClicked() {

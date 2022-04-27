@@ -35,6 +35,7 @@ public final class DBAccessor {
     private int appointmentID;
     private ObservableList<Appointments> appointments;
     private Appointments selectedAppointment;
+    private ObservableList<Contact> contacts;
 
 
     /**
@@ -213,6 +214,21 @@ public final class DBAccessor {
         return i;
     }
 
+    /**
+     * Gets Customer by ID number
+     * @param ID number
+     * @return Customer
+     */
+    public Customer getCustomerByID(int ID) {
+        Customer customer = new Customer(-1, "", "", "", "", "", "");
+        for (Customer cust : customers) {
+            if (cust.getID() == ID) {
+                customer = cust;
+            }
+        }
+        return customer;
+    }
+
     /*******************************************************************************************************
      ******************************************APPOINTMENT**************************************************
      ******************************************FUNCTIONS****************************************************
@@ -222,9 +238,9 @@ public final class DBAccessor {
     private ObservableList<Appointments> createExampleAppointmentData() {
         List<Appointments> appoint = new ArrayList<>();
         ObservableList<Appointments> appointments = FXCollections.observableList(appoint);
-        Appointments a1 = new Appointments(this.getNewAppointmentID(), "A", "Sales", "54* by 63*", "Marketing", "04/05/2023 at 0930", "04/05/2023 at 1000", 2, 1, 3);
-        Appointments a2= new Appointments(this.getNewAppointmentID(), "B", "Delivery", "Longhorns", "Delivery", "07/05/2022 at 1030", "07/05/2022 at 1130", 1, 2, 4);
-        Appointments a3 = new Appointments(this.getNewAppointmentID(), "C", "Sales", "Dark Island Hotel", "Sales", "06/12/2022 at 0900", "06/12/2022 at 1000", 3, 2, 1);
+        Appointments a1 = new Appointments(this.getNewAppointmentID(), "A", "Sales", "54* by 63*", "Marketing", "04-05-2023T09:30:00", "04-05-2023T10:00:00", 2, 1, 3);
+        Appointments a2= new Appointments(this.getNewAppointmentID(), "B", "Delivery", "Longhorns", "Delivery", "07-05-2022T10:30:00", "07-05-2022T11:30:00", 1, 2, 4);
+        Appointments a3 = new Appointments(this.getNewAppointmentID(), "C", "Sales", "Dark Island Hotel", "Sales", "06-12-2022T09:00:00", "06-12-2022T10:00:00", 3, 2, 1);
         appointments.add(a1);
         appointments.add(a2);
         appointments.add(a3);
@@ -275,16 +291,39 @@ public final class DBAccessor {
 
     }
 
-    public ObservableList<Contact> getContactList() {
+    private void setExampleContactList() {
         List<Contact> contact = new ArrayList<>();
-        ObservableList<Contact> contacts = FXCollections.observableList(contact);
+        contacts = FXCollections.observableList(contact);
         Contact c1 = new Contact(1, "Yue");
         Contact c2 = new Contact(2, "Spock");
         Contact c3 = new Contact(3, "Yoda");
         contacts.add(c1);
         contacts.add(c2);
         contacts.add(c3);
+    }
+
+    /**
+     * Getter for contact list
+     * @return
+     */
+    public ObservableList<Contact> getContactList() {
+        setExampleContactList();
         return contacts;
+    }
+
+    /**
+     * Gets the Contact that has this ID number
+     * @param Id contact's ID number
+     * @return Contact
+     */
+    public Contact getContactByID(int Id) {
+        Contact contact = new Contact(-1, "");
+        for  (Contact con : contacts) {
+            if (con.getID() == Id) {
+                contact = con;
+            }
+        }
+        return contact;
     }
 
 
