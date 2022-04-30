@@ -52,12 +52,12 @@
       <DatePicker fx:id="sDateSelector" disable="true" layoutX="438.0" layoutY="442.0" />
       <Label fx:id="sTimeLabel" layoutX="368.0" layoutY="494.0" text="Start Time:" />
       <ComboBox fx:id="sTimeCombo" disable="true" layoutX="438.0" layoutY="490.0" prefWidth="150.0" />
-      <Label fx:id="eTimeLabel" layoutX="670.0" layoutY="360.0" text="End Time:" />
-      <ComboBox fx:id="eTimeCombo" disable="true" layoutX="764.0" layoutY="356.0" prefWidth="150.0" />
-      <Label fx:id="customerLabel" layoutX="670.0" layoutY="402.0" text="Customer ID:" />
-      <ComboBox fx:id="customerCombo" disable="true" layoutX="764.0" layoutY="398.0" prefWidth="150.0" />
-      <!--<Label fx:id="userLabel" layoutX="670.0" layoutY="446.0" text="User ID:" />
-      <ComboBox fx:id="userCombo" disable="true" layoutX="764.0" layoutY="442.0" prefWidth="150.0" />-->
+       <Label fx:id="eDateLabel" layoutX="670.0" layoutY="360.0" text="End Date:" />
+       <DatePicker fx:id="eDateSelector" disable="true" layoutX="764.0" layoutY="356.0" />
+       <Label fx:id="eTimeLabel" layoutX="670.0" layoutY="402.0" text="End Time:" />
+      <ComboBox fx:id="eTimeCombo" disable="true" layoutX="764.0" layoutY="398.0" prefWidth="150.0" />
+      <Label fx:id="customerLabel" layoutX="670.0" layoutY="446.0" text="Customer ID:" />
+      <ComboBox fx:id="customerCombo" disable="true" layoutX="764.0" layoutY="442.0" prefWidth="150.0" />
       <Button fx:id="saveButton" disable="true" layoutX="449.0" layoutY="541.0" mnemonicParsing="false" text="Save" onMouseClicked="#saveClicked" />
    </children>
 </AnchorPane>

@@ -10,11 +10,12 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.time.LocalDate;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.List;
+import java.time.temporal.TemporalAmount;
 import java.util.ResourceBundle;
+
+import static java.time.temporal.ChronoUnit.HOURS;
 
 /**
  * This is the controller for the appointment records view
@@ -27,11 +28,6 @@ public class AppointmentController {
     private ResourceBundle msg;
     private StageSwitcher switcher;
     private ObservableList<Appointments> appointments;
-
-    //List of all the available times in EST 2400 hr format
-    private List<String> times = Arrays.asList("0800", "0830", "0900", "0930", "1000", "1030", "1100", "1130", "1200", "1230",
-            "1300", "1330", "1400", "1430", "1500", "1530", "1600", "1630", "1700", "1730", "1800", "1830",
-            "1900", "1930", "2000", "2030", "2100", "2130", "2200");
 
 
     //FXML stuff
@@ -59,9 +55,9 @@ public class AppointmentController {
     @FXML private Label typeLabel;
     @FXML private Label sDateLabel;
     @FXML private Label sTimeLabel;
+    @FXML private Label eDateLabel;
     @FXML private Label eTimeLabel;
     @FXML private Label customerLabel;
-    @FXML private Label userLabel;
     @FXML private Label headingLabel;
 
     //Text Fields
@@ -80,6 +76,7 @@ public class AppointmentController {
 
     //Date Picker
     @FXML private DatePicker sDateSelector;
+    @FXML private DatePicker eDateSelector;
 
     //Buttons
     @FXML private Button backButton;
@@ -108,16 +105,17 @@ public class AppointmentController {
         contactCombo.setDisable(disabled);
         sDateSelector.setDisable(disabled);
         sTimeCombo.setDisable(disabled);
+        eDateSelector.setDisable(disabled);
         eTimeCombo.setDisable(disabled);
         customerCombo.setDisable(disabled);
-        //userCombo.setDisable(disabled);
         saveButton.setDisable(disabled);
     }
 
     /**
      * Populate the combo boxes with data from database
-     * And the datepicker with future dates
-     * Implemented through a lambda function because the callback function is quite messy otherwise
+     * And the datepickers with dates today forward
+     * Implemented through a lambda function because
+     * the callback function is quite messy otherwise
      */
     @FXML private void populateCombos() {
         ObservableList<Contact> contacts = dba.getContactList();
@@ -129,11 +127,19 @@ public class AppointmentController {
         for (Customer c : customers)
             customerCombo.getItems().add(c.getName());
         sTimeCombo.getItems().clear();
-        sTimeCombo.getItems().addAll(times);
+        sTimeCombo.getItems().addAll(dba.getTimes());
         eTimeCombo.getItems().clear();
-        eTimeCombo.getItems().addAll(times);
+        eTimeCombo.getItems().addAll(dba.getTimes());
         //Disable unsuitable (past) dates for appointments
         sDateSelector.setDayCellFactory(appointmentDayPicker -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                // < 0 to put all appointments starting at least today
+                setDisable(empty || date.compareTo(LocalDate.now()) < 0);
+            }
+        });
+        eDateSelector.setDayCellFactory(appointmentDayPicker -> new DateCell() {
             @Override
             public void updateItem(LocalDate date, boolean empty) {
                 super.updateItem(date, empty);
@@ -152,6 +158,9 @@ public class AppointmentController {
         populateCombos();
     }
 
+    /**
+     * Sets the fields to match the selected appointment
+     */
     @FXML private void setFields() {
         Appointments selected = appointTable.getSelectionModel().getSelectedItem();
         appointmentField.setText(Integer.toString(selected.getAppointmentID()));
@@ -161,10 +170,38 @@ public class AppointmentController {
         typeField.setText(selected.getType());
         contactCombo.setValue(dba.getContactByID(selected.getContactID()).getName());
         sDateSelector.setValue(LocalDate.parse(selected.getStart().substring(0, 10), DateTimeFormatter.ofPattern("MM-dd-yyyy")));
-        sTimeCombo.setValue(selected.getStart());
-        eTimeCombo.setValue(selected.getEnd());
+        sTimeCombo.setValue(LocalTime.parse(selected.getStart().substring(11)));
+        eDateSelector.setValue(LocalDate.parse(selected.getEnd().substring(0, 10), DateTimeFormatter.ofPattern("MM-dd-yyyy")));
+        eTimeCombo.setValue(LocalTime.parse(selected.getEnd().substring(11)));
         customerCombo.setValue(dba.getCustomerByID(selected.getCustomerID()).getName());
 
+    }
+
+    /**
+     * Clears the fields
+     */
+    @FXML private void clearFields() {
+        appointmentField.clear();
+        titleField.clear();
+        titleField.setPromptText(null);
+        descriptionField.clear();
+        descriptionField.setPromptText(null);
+        locationField.clear();
+        locationField.setPromptText(null);
+        typeField.clear();
+        typeField.setPromptText(null);
+        contactCombo.getItems().clear();
+        contactCombo.setPromptText(null);
+        sDateSelector.setValue(null);
+        sDateSelector.setPromptText(null);
+        sTimeCombo.getItems().clear();
+        sTimeCombo.setPromptText(null);
+        eDateSelector.setValue(null);
+        eDateSelector.setPromptText(null);
+        eTimeCombo.getItems().clear();
+        eTimeCombo.setPromptText(null);
+        customerCombo.getItems().clear();
+        customerCombo.setPromptText(null);
     }
 
     /**
@@ -194,10 +231,129 @@ public class AppointmentController {
     }
 
     /**
+     * Validates text fields
+     * @param field a TextField object
+     * @return true if valid, false if not
+     */
+    @FXML private boolean validText(TextField field) {
+        if (field.getText().isEmpty()) {
+            field.setPromptText(msg.getString("Required"));
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Validates combo boxes
+     * @param combo a ComboBox object
+     * @return true if a selection was made
+     */
+    @FXML private boolean validCombo(ComboBox combo) {
+        if (combo.getSelectionModel().isEmpty()) {
+            combo.setPromptText(msg.getString("Required"));
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Make sure that appointment times fall within specs
+     * @return true if appointment is acceptable
+     */
+    @FXML private boolean validateDateTime() {
+        boolean valid = true;
+        boolean timeValid = true;
+        if (!validText(typeField)) {
+            valid = false;
+            timeValid = false;
+        }
+        if (sDateSelector.getValue() == null) {
+            sDateSelector.setPromptText(msg.getString("Required"));
+            valid = false;
+            timeValid = false;
+        }
+        if (!validCombo(sTimeCombo)) {
+            valid = false;
+            timeValid = false;
+        }
+        if (eDateSelector.getValue() == null) {
+            eDateSelector.setPromptText(msg.getString("Required"));
+            valid = false;
+            timeValid = false;
+        }
+        if (!validCombo(eTimeCombo)) {
+            valid = false;
+            timeValid = false;
+        }
+        if (timeValid) {
+            LocalDateTime begin = sDateSelector.getValue().atTime((LocalTime) sTimeCombo.getSelectionModel().getSelectedItem());
+            ZonedDateTime beginZoned = begin.atZone(dba.getZone());
+            ZonedDateTime beginEST = beginZoned.withZoneSameInstant(ZoneId.of("America/New_York"));
+            LocalDateTime end = eDateSelector.getValue().atTime((LocalTime) eTimeCombo.getSelectionModel().getSelectedItem());
+            ZonedDateTime endZoned = end.atZone(dba.getZone());
+            ZonedDateTime endEST = endZoned.withZoneSameInstant(ZoneId.of("America/New_York"));
+            if (begin.isAfter(end)) {
+                eDateSelector.setValue(null);
+                eDateSelector.setPromptText(msg.getString("MustBeAfter"));
+                eDateSelector.setStyle("color: red; -fx-font-weight: bold;");
+                eTimeCombo.getSelectionModel().clearSelection();
+                eTimeCombo.setPromptText(msg.getString("AfterStartTime"));
+                eTimeCombo.setStyle("color: red; -fx-font-weight: bold;");
+                valid = false;
+            }
+            if (end.minus(14, HOURS).isAfter(begin)) {
+                System.out.println("Too Long");
+                valid = false;
+            } else if (beginEST.getHour() < 8 || beginEST.getHour() > 21) {
+                sDateSelector.setValue(null);
+                sDateSelector.setPromptText(msg.getString("OutsideHours"));
+                valid = false;
+            } else if (endEST.getHour() < 9 || endEST.getHour() > 22) {
+                eDateSelector.setValue(null);
+                eDateSelector.setPromptText(msg.getString("OutsideHours"));
+                valid = false;
+            }
+        }
+        return valid;
+    }
+
+    /**
+     * Validates the form information before sending to database
+     * @return true if form information is valid
+     */
+    @FXML private boolean validateInput() {
+        boolean valid = true;
+        if (!validText(titleField)) {
+            valid = false;
+        }
+        if (!validText(descriptionField)) {
+            valid = false;
+        }
+        if (!validText(locationField)) {
+            valid = false;
+        }
+        if (!validCombo(contactCombo)) {
+            valid = false;
+        }
+        if (!validateDateTime()) {
+            valid = false;
+        }
+        if (customerCombo.getValue() == null) {
+            customerCombo.setPromptText(msg.getString("Required"));
+            valid = false;
+        }
+        return valid;
+    }
+
+    /**
      * This method saves the form data when clicked, if form data is valid, or error message is displayed if not
      */
     @FXML private void saveClicked() {
-        disableFields(true);
+        if(validateInput()) {
+            //saveData();
+            clearFields();
+            disableFields(true);
+        }
     }
 
     /**
@@ -227,9 +383,9 @@ public class AppointmentController {
         typeLabel.setText(msg.getString("Type") + ":");
         sDateLabel.setText(msg.getString("StartDate") + ":");
         sTimeLabel.setText(msg.getString("StartTime") + ":");
+        eDateLabel.setText(msg.getString("EndDate") + ":");
         eTimeLabel.setText(msg.getString("EndTime") + ":");
         customerLabel.setText(msg.getString("CustID") + ":");
-        //userLabel.setText(msg.getString("UserID") + ":");
         headingLabel.setText(msg.getString("AppointHeading"));
     }
     /**
@@ -246,11 +402,24 @@ public class AppointmentController {
         titleCol.setCellValueFactory(new PropertyValueFactory<Appointments, String>("title"));
         descrCol.setCellValueFactory(new PropertyValueFactory<Appointments, String>("description"));
         locCol.setCellValueFactory(new PropertyValueFactory<Appointments, String>("location"));
+        typeCol.setCellValueFactory(new PropertyValueFactory<Appointments, String>("type"));
         sDateTimeCol.setCellValueFactory(new PropertyValueFactory<Appointments, String>("start"));
         eDateTimeCol.setCellValueFactory(new PropertyValueFactory<Appointments, String>("end"));
         custIdCol.setCellValueFactory(new PropertyValueFactory<Appointments, String>("customerID"));
         userIdCol.setCellValueFactory(new PropertyValueFactory<Appointments, String>("userID"));
         contactCol.setCellValueFactory(new PropertyValueFactory<Appointments, String>("contactID"));
         appointTable.getItems().setAll(appointments);
+        //Fix prompt text visibility for combo boxes
+        eTimeCombo.setButtonCell(new ListCell<LocalTime>() {
+            @Override
+            protected void updateItem(LocalTime item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item == null || empty) {
+                    setText(eTimeCombo.getPromptText());
+                } else {
+                    setText(item.toString());
+                }
+            }
+        });
     }
 }

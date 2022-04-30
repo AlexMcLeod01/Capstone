@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.*;
 
@@ -36,6 +37,7 @@ public final class DBAccessor {
     private ObservableList<Appointments> appointments;
     private Appointments selectedAppointment;
     private ObservableList<Contact> contacts;
+    private ObservableList<LocalTime> times;
 
 
     /**
@@ -238,9 +240,9 @@ public final class DBAccessor {
     private ObservableList<Appointments> createExampleAppointmentData() {
         List<Appointments> appoint = new ArrayList<>();
         ObservableList<Appointments> appointments = FXCollections.observableList(appoint);
-        Appointments a1 = new Appointments(this.getNewAppointmentID(), "A", "Sales", "54* by 63*", "Marketing", "04-05-2023T09:30:00", "04-05-2023T10:00:00", 2, 1, 3);
-        Appointments a2= new Appointments(this.getNewAppointmentID(), "B", "Delivery", "Longhorns", "Delivery", "07-05-2022T10:30:00", "07-05-2022T11:30:00", 1, 2, 4);
-        Appointments a3 = new Appointments(this.getNewAppointmentID(), "C", "Sales", "Dark Island Hotel", "Sales", "06-12-2022T09:00:00", "06-12-2022T10:00:00", 3, 2, 1);
+        Appointments a1 = new Appointments(this.getNewAppointmentID(), "A", "Sales", "54* by 63*", "Marketing", "04-05-2023 at 09:00:00", "04-05-2023 at 10:00:00", 2, 1, 3);
+        Appointments a2= new Appointments(this.getNewAppointmentID(), "B", "Delivery", "Longhorns", "Delivery", "07-05-2022 at 10:00:00", "07-05-2022 at 11:00:00", 1, 2, 4);
+        Appointments a3 = new Appointments(this.getNewAppointmentID(), "C", "Sales", "Dark Island Hotel", "Sales", "06-12-2022 at 09:00:00", "06-12-2022 at 10:00:00", 3, 2, 1);
         appointments.add(a1);
         appointments.add(a2);
         appointments.add(a3);
@@ -303,6 +305,31 @@ public final class DBAccessor {
     }
 
     /**
+     * Creates a list of times for use elsewhere
+     */
+    private void setTimes() {
+        //List of all the available times in EST 2400 hr format
+        List<LocalTime> time = Arrays.asList(LocalTime.parse("00:00"), LocalTime.parse("01:00"), LocalTime.parse("02:00"),
+                LocalTime.parse("03:00"), LocalTime.parse("04:00"), LocalTime.parse("05:00"), LocalTime.parse("06:00"),
+                LocalTime.parse("07:00"), LocalTime.parse("08:00"), LocalTime.parse("09:00"), LocalTime.parse("10:00"),
+                LocalTime.parse("11:00"), LocalTime.parse("12:00"), LocalTime.parse("13:00"), LocalTime.parse("14:00"),
+                LocalTime.parse("15:00"), LocalTime.parse("16:00"), LocalTime.parse("17:00"), LocalTime.parse("18:00"),
+                LocalTime.parse("19:00"), LocalTime.parse("20:00"), LocalTime.parse("21:00"), LocalTime.parse("22:00"),
+                LocalTime.parse("23:00"));
+        times = FXCollections.observableList(time);
+    }
+
+    /**
+     * Returns the ObservableList times for use in Appointment time data
+     */
+    public ObservableList<LocalTime> getTimes() {
+        if (times.isEmpty()) {
+            setTimes();
+        }
+        return times;
+    }
+
+    /**
      * Getter for contact list
      * @return
      */
@@ -343,6 +370,7 @@ public final class DBAccessor {
         customers = createExampleCustomerData();
         zone = ZoneId.systemDefault();
         local = Locale.getDefault();
+        setTimes();
         bundle = ResourceBundle.getBundle("com.example.c195/MessagesBundle", local);
         format = new SimpleDateFormat("MM/dd/yyyy 'at' HH:mm:ss z");
         String path = System.getProperty("user.dir") + "\\login_activity.txt";
