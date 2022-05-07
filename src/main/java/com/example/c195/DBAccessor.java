@@ -9,8 +9,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoField;
 import java.util.*;
 
 /**
@@ -27,11 +30,11 @@ public final class DBAccessor {
     private ResourceBundle bundle;
     private SimpleDateFormat format;
     private File loginFile;
+    private User currentUser;
     //Customer Screen variables
     private ObservableList<Customer> customers;
     private int customerID;
     private Customer selectedCustomer;
-    private String currentUser;
     //Appointment Screen variables
     private int appointmentID;
     private ObservableList<Appointments> appointments;
@@ -115,7 +118,7 @@ public final class DBAccessor {
         if (user.equals("Admin") && pass.equals("12345")) {
             String mes = "\nSuccessful Login:\nUsername: " + user + "\nDate: " + format.format(date);
             Write(mes);
-            currentUser = user;
+            currentUser = new User(user, 1);
             return true;
         } else {
             String err = "\nFailed Login Attempt:\nUsername: " + user + "\nDate: " + format.format(date);
@@ -128,7 +131,7 @@ public final class DBAccessor {
      * This is a getter for the currentUser who is logged in
      * @return currentUser
      */
-    public String getCurrentUser() {
+    public User getCurrentUser() {
         return currentUser;
     }
 
@@ -168,6 +171,12 @@ public final class DBAccessor {
      * @param customer A Customer object
      */
     public void deleteCustomer(Customer customer) {
+        ObservableList<Appointments> custAppoint = getAppointmentsByCustomerID(customer.getID());
+        if (!custAppoint.isEmpty()) {
+            for (Appointments appoint : custAppoint) {
+                deleteAppointment(appoint);
+            }
+        }
         customers.remove(customer);
     }
 
@@ -240,9 +249,9 @@ public final class DBAccessor {
     private ObservableList<Appointments> createExampleAppointmentData() {
         List<Appointments> appoint = new ArrayList<>();
         ObservableList<Appointments> appointments = FXCollections.observableList(appoint);
-        Appointments a1 = new Appointments(this.getNewAppointmentID(), "A", "Sales", "54* by 63*", "Marketing", "04-05-2023 at 09:00:00", "04-05-2023 at 10:00:00", 2, 1, 3);
-        Appointments a2= new Appointments(this.getNewAppointmentID(), "B", "Delivery", "Longhorns", "Delivery", "07-05-2022 at 10:00:00", "07-05-2022 at 11:00:00", 1, 2, 4);
-        Appointments a3 = new Appointments(this.getNewAppointmentID(), "C", "Sales", "Dark Island Hotel", "Sales", "06-12-2022 at 09:00:00", "06-12-2022 at 10:00:00", 3, 2, 1);
+        Appointments a1 = new Appointments(this.getNewAppointmentID(), "A", "Sales", "54* by 63*", "Marketing", "2022-04-30T17:00", "2022-04-30T18:00", 2, 1, 3);
+        Appointments a2= new Appointments(this.getNewAppointmentID(), "B", "Delivery", "Longhorns", "Delivery", "2022-05-01T10:40", "2022-05-01T11:00", 1, 2, 2);
+        Appointments a3 = new Appointments(this.getNewAppointmentID(), "C", "Sales", "Dark Island Hotel", "Sales", "2022-06-12T09:00", "2022-06-12T10:00", 3, 2, 1);
         appointments.add(a1);
         appointments.add(a2);
         appointments.add(a3);
@@ -255,7 +264,41 @@ public final class DBAccessor {
      * @return Observable List of all appointments
      */
     public ObservableList<Appointments> getAllAppointments() {
-        return appointments;
+        return this.appointments;
+    }
+
+    /**
+     * Gets a list of all appointments this week
+     * @return ObservableList of Appointment Objects
+     */
+    public ObservableList<Appointments> getWeekAppointments() {
+        List<Appointments> list = new ArrayList<Appointments>();
+        ObservableList<Appointments> weekAppoint = FXCollections.observableList(list);
+        for (Appointments a : appointments) {
+            LocalDate aDate = LocalDate.parse(a.getStart().substring(0, 10));
+            if (aDate.getYear() == LocalDate.now().getYear() &&
+                    aDate.get(ChronoField.ALIGNED_WEEK_OF_YEAR) == LocalDate.now().get(ChronoField.ALIGNED_WEEK_OF_YEAR)) {
+                weekAppoint.add(a);
+            }
+        }
+        return weekAppoint;
+    }
+
+    /**
+     * Gets a list of all appointments this month
+     * @return ObservableList of Appointment objects
+     */
+    public ObservableList<Appointments> getMonthAppointments() {
+        List<Appointments> list = new ArrayList<Appointments>();
+        ObservableList<Appointments> monthAppoint = FXCollections.observableList(list);
+        for (Appointments a : appointments) {
+            LocalDate aDate = LocalDate.parse(a.getStart().substring(0, 10));
+            if (aDate.getYear() == LocalDate.now().getYear() &&
+                    aDate.getMonth() == LocalDate.now().getMonth()) {
+                monthAppoint.add(a);
+            }
+        }
+        return monthAppoint;
     }
 
     /**
@@ -263,7 +306,7 @@ public final class DBAccessor {
      * @param appointment an Appointments object
      */
     public void deleteAppointment(Appointments appointment) {
-        appointments.remove(appointment);
+        this.appointments.remove(appointment);
     }
 
     /**
@@ -275,11 +318,35 @@ public final class DBAccessor {
     }
 
     /**
+     * Adds appointment to database
+     * @param appointment an Appointment object
+     */
+    public void setNewAppointment(Appointments appointment) { this.appointments.add(appointment); }
+
+    /**
+     * Replaces the data for the selected appointment with the new data
+     * @param appointment an appointment object
+     */
+    public void replaceSelectedAppointment(Appointments appointment) {
+        int id = appointment.getAppointmentID();
+        this.appointments.set(this.appointments.indexOf(getAppointmentByID(id)), appointment);
+        clearSelectedAppointment();
+    }
+
+    /**
      * Getter for selectedAppointment property
      * @return selectedAppointment
      */
     public Appointments getSelectedAppointment() {
         return this.selectedAppointment;
+    }
+
+    /**
+     * Clears the selectedAppointment property
+     */
+    public void clearSelectedAppointment() {
+        this.selectedAppointment = null;
+        return;
     }
 
     /**
@@ -290,7 +357,37 @@ public final class DBAccessor {
         int i = this.appointmentID;
         this.appointmentID++;
         return i;
+    }
 
+    /**
+     * Gets the Appointment that has this ID number
+     * @param Id Appointment's ID number
+     * @return Appointment
+     */
+    public Appointments getAppointmentByID(int Id) {
+        Appointments appointment = new Appointments(-1, "", "", "", "", "", "", -1, -1, -1);
+        for  (Appointments appoint : appointments) {
+            if (appoint.getAppointmentID() == Id) {
+                appointment = appoint;
+            }
+        }
+        return appointment;
+    }
+
+    /**
+     * This method returns an observable list of appointments that are scheduled with a single customer
+     * @param Id Customer ID
+     * @return ObservableList of Appointment objects
+     */
+    public ObservableList<Appointments> getAppointmentsByCustomerID(int Id) {
+        List<Appointments> list = new ArrayList<>();
+        ObservableList<Appointments> customerAppointments = FXCollections.observableList(list);
+        for (Appointments appoint : appointments) {
+            if (appoint.getCustomerID() == Id) {
+                customerAppointments.add(appoint);
+            }
+        }
+        return customerAppointments;
     }
 
     private void setExampleContactList() {
@@ -351,6 +448,33 @@ public final class DBAccessor {
             }
         }
         return contact;
+    }
+
+
+    /******************************************************************************************************
+     ******************************************REPORT******************************************************
+     ******************************************FUNCTIONS***************************************************
+     ******************************************************************************************************/
+
+    /**
+     * This function returns the type/month count report
+     * It is easiest to use SQL versus searching the data in java
+     * @return ObservableList of TypeReport objects
+     */
+    public ObservableList<TypeReport> getTypeReport() {
+        List<TypeReport> rep = new ArrayList<>();
+        ObservableList<TypeReport> report = FXCollections.observableList(rep);
+
+        //Do some stuff in SQL
+        //Most likely:
+        //statement = (Statement) connection.createStatement();
+        //String sql = "SELECT TYPE, MONTH, COUNT(*)";
+        //ResultSet result = statement.executeQuery(sql);
+        //while (result.next()) {
+        //report.add(new TypeReport(result.getString("type"), result.getString("month"), result.getInt("count")));
+
+
+        return report;
     }
 
 

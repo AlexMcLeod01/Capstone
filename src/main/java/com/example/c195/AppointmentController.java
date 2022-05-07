@@ -12,6 +12,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
 import java.util.ResourceBundle;
 
@@ -59,6 +60,7 @@ public class AppointmentController {
     @FXML private Label eTimeLabel;
     @FXML private Label customerLabel;
     @FXML private Label headingLabel;
+    @FXML private Label errorLabel;
 
     //Text Fields
     @FXML private TextField appointmentField;
@@ -114,18 +116,18 @@ public class AppointmentController {
     /**
      * Populate the combo boxes with data from database
      * And the datepickers with dates today forward
-     * Implemented through a lambda function because
+     * Implemented through lambda functions because
      * the callback function is quite messy otherwise
      */
     @FXML private void populateCombos() {
         ObservableList<Contact> contacts = dba.getContactList();
         contactCombo.getItems().clear();
         for (Contact c : contacts)
-            contactCombo.getItems().add(c.getName());
+            contactCombo.getItems().add(c.getID());
         ObservableList<Customer> customers = dba.getAllCustomers();
         customerCombo.getItems().clear();
         for (Customer c : customers)
-            customerCombo.getItems().add(c.getName());
+            customerCombo.getItems().add(c.getID());
         sTimeCombo.getItems().clear();
         sTimeCombo.getItems().addAll(dba.getTimes());
         eTimeCombo.getItems().clear();
@@ -168,12 +170,12 @@ public class AppointmentController {
         descriptionField.setText(selected.getDescription());
         locationField.setText(selected.getLocation());
         typeField.setText(selected.getType());
-        contactCombo.setValue(dba.getContactByID(selected.getContactID()).getName());
+        contactCombo.setValue(selected.getContactID());
         sDateSelector.setValue(LocalDate.parse(selected.getStart().substring(0, 10), DateTimeFormatter.ofPattern("MM-dd-yyyy")));
         sTimeCombo.setValue(LocalTime.parse(selected.getStart().substring(11)));
         eDateSelector.setValue(LocalDate.parse(selected.getEnd().substring(0, 10), DateTimeFormatter.ofPattern("MM-dd-yyyy")));
         eTimeCombo.setValue(LocalTime.parse(selected.getEnd().substring(11)));
-        customerCombo.setValue(dba.getCustomerByID(selected.getCustomerID()).getName());
+        customerCombo.setValue(selected.getCustomerID());
 
     }
 
@@ -257,6 +259,31 @@ public class AppointmentController {
     }
 
     /**
+     * Checks if the Customer's appointments overlap
+     * @return true if overlaps
+     */
+    @FXML private boolean doesCustomerOverlap() {
+        boolean overlaps = false;
+        int id = (int) customerCombo.getValue();
+        LocalDateTime start = sDateSelector.getValue().atTime((LocalTime)sTimeCombo.getValue());
+        LocalDateTime end = eDateSelector.getValue().atTime((LocalTime)eTimeCombo.getValue());
+        ObservableList<Appointments> appoint = dba.getAppointmentsByCustomerID(id);
+        for (Appointments appointment : appoint) {
+            LocalDateTime appBeg = LocalDateTime.parse(appointment.getStart());
+            LocalDateTime appEnd = LocalDateTime.parse(appointment.getEnd());
+            //If new appointment falls during duration of old appointment
+            if (((start.isBefore(appEnd)) && (start.isAfter(appBeg) || start.equals(appBeg))) ||
+                    ((end.isBefore(appEnd) || end.equals(appEnd)) && (end.isAfter(appBeg)))) {
+                overlaps = true;
+            }
+            if (start.isBefore(appBeg) && end.isAfter(appEnd)) {
+                overlaps = true;
+            }
+        }
+        return overlaps;
+    }
+
+    /**
      * Make sure that appointment times fall within specs
      * @return true if appointment is acceptable
      */
@@ -286,6 +313,7 @@ public class AppointmentController {
             timeValid = false;
         }
         if (timeValid) {
+            //Check times against EST Business Hours
             LocalDateTime begin = sDateSelector.getValue().atTime((LocalTime) sTimeCombo.getSelectionModel().getSelectedItem());
             ZonedDateTime beginZoned = begin.atZone(dba.getZone());
             ZonedDateTime beginEST = beginZoned.withZoneSameInstant(ZoneId.of("America/New_York"));
@@ -294,23 +322,30 @@ public class AppointmentController {
             ZonedDateTime endEST = endZoned.withZoneSameInstant(ZoneId.of("America/New_York"));
             if (begin.isAfter(end)) {
                 eDateSelector.setValue(null);
-                eDateSelector.setPromptText(msg.getString("MustBeAfter"));
-                eDateSelector.setStyle("color: red; -fx-font-weight: bold;");
+                errorLabel.setText(msg.getString("MustBeAfter") + msg.getString("AfterStartTime"));
                 eTimeCombo.getSelectionModel().clearSelection();
-                eTimeCombo.setPromptText(msg.getString("AfterStartTime"));
-                eTimeCombo.setStyle("color: red; -fx-font-weight: bold;");
                 valid = false;
             }
             if (end.minus(14, HOURS).isAfter(begin)) {
-                System.out.println("Too Long");
+                eTimeCombo.getSelectionModel().clearSelection();
+                errorLabel.setText(msg.getString("OutsideHours"));
+                eTimeCombo.setStyle("-fx-font-weight: bold;");
+                valid = false;
+            } else if (end.equals(begin)) {
+                eTimeCombo.getSelectionModel().clearSelection();
+                errorLabel.setText(msg.getString("TooShort"));
                 valid = false;
             } else if (beginEST.getHour() < 8 || beginEST.getHour() > 21) {
                 sDateSelector.setValue(null);
-                sDateSelector.setPromptText(msg.getString("OutsideHours"));
+                errorLabel.setText(msg.getString("OutsideHours"));
                 valid = false;
             } else if (endEST.getHour() < 9 || endEST.getHour() > 22) {
                 eDateSelector.setValue(null);
-                eDateSelector.setPromptText(msg.getString("OutsideHours"));
+                errorLabel.setText(msg.getString("OutsideHours"));
+                valid = false;
+            } else if (doesCustomerOverlap()) {
+                eTimeCombo.getSelectionModel().clearSelection();
+                errorLabel.setText(msg.getString("CustomerOverlap"));
                 valid = false;
             }
         }
@@ -338,11 +373,26 @@ public class AppointmentController {
         if (!validateDateTime()) {
             valid = false;
         }
-        if (customerCombo.getValue() == null) {
-            customerCombo.setPromptText(msg.getString("Required"));
+        if (!validCombo(customerCombo)) {
             valid = false;
         }
         return valid;
+    }
+
+    @FXML private void saveFormData() {
+        Appointments appointment;
+        LocalDateTime start = sDateSelector.getValue().atTime((LocalTime) sTimeCombo.getValue());
+        LocalDateTime end = eDateSelector.getValue().atTime((LocalTime) eTimeCombo.getValue());
+        appointment = new Appointments(Integer.parseInt(appointmentField.getText()), titleField.getText(), descriptionField.getText(),
+                locationField.getText(), typeField.getText(), start.toString(), end.toString(), (int) customerCombo.getValue(),
+                dba.getCurrentUser().getID(), (int) contactCombo.getValue());
+        if (this.appointments.contains(dba.getAppointmentByID(appointment.getAppointmentID()))) {
+            dba.replaceSelectedAppointment(appointment);
+        } else {
+            dba.setNewAppointment(appointment);
+        }
+        appointments = dba.getAllAppointments();
+        appointTable.getItems().setAll(appointments);
     }
 
     /**
@@ -350,9 +400,11 @@ public class AppointmentController {
      */
     @FXML private void saveClicked() {
         if(validateInput()) {
-            //saveData();
+            saveFormData();
             clearFields();
             disableFields(true);
+        } else {
+            errorLabel.setVisible(true);
         }
     }
 
