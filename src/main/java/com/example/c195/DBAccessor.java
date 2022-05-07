@@ -10,10 +10,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.util.*;
 import java.util.Date;
@@ -277,24 +275,25 @@ public final class DBAccessor {
             String sql = "SELECT * FROM appointments";//SELECT * FROM appointments";
             ResultSet result = queryDatabase(sql, connection);
             while (result.next()) {
-                System.out.println(result.getString(1) + " " + result.getString(2) +
-                        " " + result.getString(3) + " " + result.getString(4) + " " +
-                        result.getString(5) + " " + result.getDate(6) + " " +
-                        result.getDate(7) + " " + result.getInt(12) + " " + result.getInt(13) +
-                        " " + result.getInt(14));
-                /**int id = result.getInt(1);
+                //Build an Appointments object with results
+                int id = result.getInt(1);
                 String title = result.getString(2);
                 String desc = result.getString(3);
                 String loc = result.getString(4);
                 String type = result.getString(5);
-                //LocalDateTime start = result.getDate(6).toLocalDate();
-                 //LocalDateTime end = result.getDate(7).toLocalDate();
-                 int cust = result.getInt(12);
-                 int user = result.getInt(13);
-                 int cont = result.getInt(14);
-                Appointments a = new Appointments(id, title, desc, loc, type start, end,
-                    cust, user, cont);*/
-
+                //Convert datetime to zoneddatetime
+                LocalDateTime start = result.getDate(6).toLocalDate().atTime(result.getTime(6).toLocalTime());
+                ZonedDateTime zStart = start.atZone(ZoneOffset.UTC);
+                LocalDateTime localStart = zStart.withZoneSameInstant(getZone()).toLocalDateTime();
+                LocalDateTime end = result.getDate(7).toLocalDate().atTime(result.getTime(7).toLocalTime());
+                ZonedDateTime zEnd = end.atZone(ZoneOffset.UTC);
+                LocalDateTime localEnd = zEnd.withZoneSameInstant(getZone()).toLocalDateTime();
+                int cust = result.getInt(12);
+                int user = result.getInt(13);
+                int cont = result.getInt(14);
+                Appointments a = new Appointments(id, title, desc, loc, type, localStart.toString(), localEnd.toString(),
+                    cust, user, cont);
+                appointments.add(a);
             }
             connection.close();
         } catch (Exception e) {
@@ -344,6 +343,16 @@ public final class DBAccessor {
      */
     public void deleteAppointment(Appointments appointment) {
         this.appointments.remove(appointment);
+        try {
+            Connection connection = DriverManager.getConnection(path, username, pass);
+            String sql = "DELETE FROM appointments WHERE Appointment_ID = ?";
+            PreparedStatement prepared = connection.prepareStatement(sql);
+            prepared.setInt(1, appointment.getAppointmentID());
+            prepared.executeUpdate();
+            connection.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -358,7 +367,41 @@ public final class DBAccessor {
      * Adds appointment to database
      * @param appointment an Appointment object
      */
-    public void setNewAppointment(Appointments appointment) { this.appointments.add(appointment); }
+    public void setNewAppointment(Appointments appointment) {
+        this.appointments.add(appointment);
+        //Convert time to UTC
+        LocalDateTime start = LocalDateTime.parse(appointment.getStart());
+        ZonedDateTime zStart = start.atZone(getZone());
+        start = zStart.withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
+        LocalDateTime end = LocalDateTime.parse(appointment.getEnd());
+        ZonedDateTime zEnd = end.atZone(getZone());
+        end = zEnd.withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
+        try {
+            Connection connection = DriverManager.getConnection(path, username, pass);
+            String sql = "INSERT INTO appointments (Appointment_ID, Title, Description, Location, Type," +
+                    "Start, End, Create_Date, Created_By, Last_Update, Last_Updated_By, Customer_ID, " +
+                    "User_ID, Contact_ID) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+            PreparedStatement prepared = connection.prepareStatement(sql);
+            prepared.setInt(1, appointment.getAppointmentID());
+            prepared.setString(2, appointment.getType());
+            prepared.setString(3, appointment.getDescription());
+            prepared.setString(4, appointment.getLocation());
+            prepared.setString(5, appointment.getType());
+            prepared.setTimestamp(6, Timestamp.valueOf(start.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
+            prepared.setTimestamp(7, Timestamp.valueOf(end.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
+            prepared.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
+            prepared.setString(9, getCurrentUser().getName());
+            prepared.setTimestamp(10, Timestamp.valueOf(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
+            prepared.setString(11, getCurrentUser().getName());
+            prepared.setInt(12, appointment.getCustomerID());
+            prepared.setInt(13, appointment.getUserID());
+            prepared.setInt(14, appointment.getContactID());
+            prepared.executeUpdate();
+            connection.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * Replaces the data for the selected appointment with the new data
@@ -367,6 +410,24 @@ public final class DBAccessor {
     public void replaceSelectedAppointment(Appointments appointment) {
         int id = appointment.getAppointmentID();
         this.appointments.set(this.appointments.indexOf(getAppointmentByID(id)), appointment);
+        try {
+            Connection connection = DriverManager.getConnection(path, username, pass);
+            String sql = "UPDATE appointments SET ? = ? WHERE Appointment_ID = ?";
+            PreparedStatement prepared = connection.prepareStatement(sql);
+            prepared.setInt(3, appointment.getAppointmentID());
+            prepared.setString(1, "Title");
+            prepared.setString(2, appointment.getTitle());
+            prepared.executeUpdate();
+            prepared.setString(1, "Description");
+            prepared.setString(2, appointment.getDescription());
+            prepared.executeUpdate();
+            prepared.setString(1, "Location");
+            prepared.setString(2, appointment.getLocation());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         clearSelectedAppointment();
     }
 
