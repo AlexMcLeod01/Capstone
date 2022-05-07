@@ -1,9 +1,10 @@
 package com.example.c195;
 
-import javafx.beans.InvalidationListener;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+
+import javax.xml.transform.Result;
+import java.sql.*;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -15,6 +16,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoField;
 import java.util.*;
+import java.util.Date;
 
 /**
  * This class is used to abstract the Database functions from the controller.
@@ -24,6 +26,11 @@ import java.util.*;
  * @version 1.0
  */
 public final class DBAccessor {
+    //DataBase settings
+    private String path = "jdbc:mysql://localhost:3306/client_schedule";
+    private String username = "sqlUser";
+    private String pass = "Passw0rd!";
+
     //Login screen variables
     private ZoneId zone;
     private Locale local;
@@ -264,6 +271,36 @@ public final class DBAccessor {
      * @return Observable List of all appointments
      */
     public ObservableList<Appointments> getAllAppointments() {
+        appointments.clear();
+        try {
+            Connection connection = DriverManager.getConnection(path, username, pass);
+            String sql = "SELECT * FROM appointments";//SELECT * FROM appointments";
+            ResultSet result = queryDatabase(sql, connection);
+            while (result.next()) {
+                System.out.println(result.getString(1) + " " + result.getString(2) +
+                        " " + result.getString(3) + " " + result.getString(4) + " " +
+                        result.getString(5) + " " + result.getDate(6) + " " +
+                        result.getDate(7) + " " + result.getInt(12) + " " + result.getInt(13) +
+                        " " + result.getInt(14));
+                /**int id = result.getInt(1);
+                String title = result.getString(2);
+                String desc = result.getString(3);
+                String loc = result.getString(4);
+                String type = result.getString(5);
+                //LocalDateTime start = result.getDate(6).toLocalDate();
+                 //LocalDateTime end = result.getDate(7).toLocalDate();
+                 int cust = result.getInt(12);
+                 int user = result.getInt(13);
+                 int cont = result.getInt(14);
+                Appointments a = new Appointments(id, title, desc, loc, type start, end,
+                    cust, user, cont);*/
+
+            }
+            connection.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return this.appointments;
     }
 
@@ -464,16 +501,17 @@ public final class DBAccessor {
     public ObservableList<TypeReport> getTypeReport() {
         List<TypeReport> rep = new ArrayList<>();
         ObservableList<TypeReport> report = FXCollections.observableList(rep);
-
-        //Do some stuff in SQL
-        //Most likely:
-        //statement = (Statement) connection.createStatement();
-        //String sql = "SELECT TYPE, MONTH, COUNT(*)";
-        //ResultSet result = statement.executeQuery(sql);
-        //while (result.next()) {
-        //report.add(new TypeReport(result.getString("type"), result.getString("month"), result.getInt("count")));
-
-
+        try {
+            Connection connection = DriverManager.getConnection(path, username, pass);
+            String sql = "SELECT Type, MONTH(Start), COUNT(*) FROM appointments";
+            ResultSet result = queryDatabase(sql, connection);
+            while (result.next()) {
+                report.add(new TypeReport(result.getString(1), LocalDate.of(2022, (int) result.getLong(2), 1), result.getInt(3)));
+            }
+            connection.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return report;
     }
 
@@ -482,6 +520,17 @@ public final class DBAccessor {
      ******************************************DBACCESSOR***************************************************
      ******************************************CONSTRUCTOR**************************************************
      *******************************************************************************************************/
+
+    private ResultSet queryDatabase(String sql, Connection connection) {
+        ResultSet resultSet = null;
+        try {
+            Statement statement = (Statement) connection.createStatement();
+            resultSet = statement.executeQuery(sql);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return resultSet;
+    }
 
     /**
      * The constructor should eventually initialize the database connection
