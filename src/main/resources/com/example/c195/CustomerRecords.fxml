@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="543.0" prefWidth="804.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.c195.CustomerController">
+   <children>
+      <Label layoutX="334.0" layoutY="38.0" text="Customer Records" fx:id="custHTitle" >
+         <font>
+            <Font name="System Bold" size="16.0" />
+         </font>
+      </Label>
+      <TableView layoutX="22.0" layoutY="81.0" prefHeight="200.0" prefWidth="750.0" fx:id="custTable" >
+        <columns>
+          <TableColumn prefWidth="75.0" text="Customer ID" fx:id="custIDCol" />
+          <TableColumn prefWidth="97.5999755859375" text="Customer Name" fx:id="custNameCol" />
+            <TableColumn prefWidth="169.5999755859375" text="Address" fx:id="custAddCol" />
+            <TableColumn prefWidth="82.4000244140625" text="Postal Code" fx:id="custPostCol" />
+            <TableColumn prefWidth="121.60000610351562" text="First-Level Division" fx:id="custFLDCol" />
+            <TableColumn prefWidth="78.39990234375" text="Phone" fx:id="custPhoneCol" />
+            <TableColumn prefWidth="123.19998779296873" text="Country" fx:id="custCountryCol" />
+        </columns>
+      </TableView>
+      <Button layoutX="22.0" layoutY="305.0" mnemonicParsing="false" text="Back" fx:id="backButton" onMouseClicked="#backClicked" />
+      <Button layoutX="572.0" layoutY="305.0" mnemonicParsing="false" text="Add" fx:id="addButton" onMouseClicked="#addClicked" />
+      <Button layoutX="640.0" layoutY="305.0" mnemonicParsing="false" text="Update" fx:id="updateButton" onMouseClicked="#updateClicked" />
+      <Button layoutX="721.0" layoutY="305.0" mnemonicParsing="false" text="Delete" fx:id="delButton" onMouseClicked="#deleteClicked" />
+      <Label layoutX="22.0" layoutY="353.0" text="Customer ID: " fx:id="idLabel" />
+      <TextField disable="true" layoutX="128.0" layoutY="349.0" fx:id="idField" />
+      <Label layoutX="22.0" layoutY="395.0" text="Customer Name: " fx:id="nameLabel" />
+      <TextField disable="true" layoutX="128.0" layoutY="391.0" fx:id="nameField" />
+      <Label layoutX="22.0" layoutY="440.0" text="Address: " fx:id="addressLabel" />
+      <TextField disable="true" layoutX="128.0" layoutY="436.0" fx:id="addressField" />
+      <Label layoutX="22.0" layoutY="488.0" text="Postal Code:" fx:id="postalLabel" />
+      <TextField disable="true" layoutX="128.0" layoutY="484.0" fx:id="postalField" />
+      <Label layoutX="443.0" layoutY="349.0" text="Phone:" fx:id="phoneLabel" />
+      <TextField disable="true" layoutX="565.0" layoutY="353.0" fx:id="phoneField" />
+      <Label layoutX="443.0" layoutY="391.0" text="Country: " fx:id="countryLabel" />
+      <ComboBox disable="true" layoutX="565.0" layoutY="395.0" prefWidth="150.0" fx:id="countryCombo" />
+      <Label layoutX="443.0" layoutY="440.0" text="First-Level Division: " fx:id="firstLevelLabel" />
+      <ComboBox disable="true" layoutX="565.0" layoutY="436.0" prefWidth="150.0" fx:id="firstLevelCombo" />
+       <Button disable="true" layoutX="443.0" layoutY="484.0" mnemonicParsing="false" text="Save" fx:id="saveButton" onMouseClicked="#saveClicked" />
+   </children>
+</AnchorPane>
