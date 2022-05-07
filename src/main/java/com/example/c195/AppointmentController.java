@@ -170,12 +170,12 @@ public class AppointmentController {
         descriptionField.setText(selected.getDescription());
         locationField.setText(selected.getLocation());
         typeField.setText(selected.getType());
-        contactCombo.setValue(selected.getContactID());
-        sDateSelector.setValue(LocalDate.parse(selected.getStart().substring(0, 10), DateTimeFormatter.ofPattern("MM-dd-yyyy")));
+        contactCombo.getSelectionModel().select(selected.getContactID());
+        sDateSelector.setValue(LocalDate.parse(selected.getStart().substring(0, 10)));
         sTimeCombo.setValue(LocalTime.parse(selected.getStart().substring(11)));
-        eDateSelector.setValue(LocalDate.parse(selected.getEnd().substring(0, 10), DateTimeFormatter.ofPattern("MM-dd-yyyy")));
+        eDateSelector.setValue(LocalDate.parse(selected.getEnd().substring(0, 10)));
         eTimeCombo.setValue(LocalTime.parse(selected.getEnd().substring(11)));
-        customerCombo.setValue(selected.getCustomerID());
+        customerCombo.getSelectionModel().select(selected.getCustomerID());
 
     }
 
@@ -272,12 +272,14 @@ public class AppointmentController {
             LocalDateTime appBeg = LocalDateTime.parse(appointment.getStart());
             LocalDateTime appEnd = LocalDateTime.parse(appointment.getEnd());
             //If new appointment falls during duration of old appointment
-            if (((start.isBefore(appEnd)) && (start.isAfter(appBeg) || start.equals(appBeg))) ||
-                    ((end.isBefore(appEnd) || end.equals(appEnd)) && (end.isAfter(appBeg)))) {
-                overlaps = true;
-            }
-            if (start.isBefore(appBeg) && end.isAfter(appEnd)) {
-                overlaps = true;
+            if (dba.getSelectedAppointment().getAppointmentID() != id) {
+                if (((start.isBefore(appEnd)) && (start.isAfter(appBeg) || start.equals(appBeg))) ||
+                        ((end.isBefore(appEnd) || end.equals(appEnd)) && (end.isAfter(appBeg)))) {
+                    overlaps = true;
+                }
+                if (start.isBefore(appBeg) && end.isAfter(appEnd)) {
+                    overlaps = true;
+                }
             }
         }
         return overlaps;

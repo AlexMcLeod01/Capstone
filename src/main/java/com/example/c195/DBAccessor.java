@@ -408,26 +408,40 @@ public final class DBAccessor {
      * @param appointment an appointment object
      */
     public void replaceSelectedAppointment(Appointments appointment) {
+        //Convert time to UTC
+        LocalDateTime start = LocalDateTime.parse(appointment.getStart());
+        ZonedDateTime zStart = start.atZone(getZone());
+        start = zStart.withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
+        LocalDateTime end = LocalDateTime.parse(appointment.getEnd());
+        ZonedDateTime zEnd = end.atZone(getZone());
+        end = zEnd.withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
+
+        //Convert from Appointments object to database format
         int id = appointment.getAppointmentID();
         this.appointments.set(this.appointments.indexOf(getAppointmentByID(id)), appointment);
         try {
             Connection connection = DriverManager.getConnection(path, username, pass);
-            String sql = "UPDATE appointments SET ? = ? WHERE Appointment_ID = ?";
+            String sql = "UPDATE appointments SET title = ?, description = ?, location = ?, type = ?," +
+                    "start = ?, end = ?, Last_Update = ?, Last_Updated_By = ?, Customer_ID = ?, User_ID =  ?, " +
+                    "Contact_ID = ? WHERE appointment_id = ?";
             PreparedStatement prepared = connection.prepareStatement(sql);
-            prepared.setInt(3, appointment.getAppointmentID());
-            prepared.setString(1, "Title");
-            prepared.setString(2, appointment.getTitle());
-            prepared.executeUpdate();
-            prepared.setString(1, "Description");
+            prepared.setInt(12, appointment.getAppointmentID());
+            prepared.setString(1, appointment.getTitle());
             prepared.setString(2, appointment.getDescription());
+            prepared.setString(3, appointment.getLocation());
+            prepared.setString(4, appointment.getType());
+            prepared.setTimestamp(5, Timestamp.valueOf(start.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
+            prepared.setTimestamp(6, Timestamp.valueOf(end.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
+            prepared.setTimestamp(7, Timestamp.valueOf(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
+            prepared.setString(8, getCurrentUser().getName());
+            prepared.setInt(9, appointment.getCustomerID());
+            prepared.setInt(10, appointment.getUserID());
+            prepared.setInt(11, appointment.getContactID());
             prepared.executeUpdate();
-            prepared.setString(1, "Location");
-            prepared.setString(2, appointment.getLocation());
-
+            connection.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         clearSelectedAppointment();
     }
 
