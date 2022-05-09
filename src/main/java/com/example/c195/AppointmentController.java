@@ -11,9 +11,6 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAmount;
 import java.util.ResourceBundle;
 
 import static java.time.temporal.ChronoUnit.HOURS;
@@ -26,6 +23,8 @@ import static java.time.temporal.ChronoUnit.HOURS;
 public class AppointmentController {
     //Model stuff
     private DBAccessor dba;
+    private AppointmentsDatabaseAccessor ada;
+    private CustomerDatabaseAccessor cda;
     private ResourceBundle msg;
     private StageSwitcher switcher;
     private ObservableList<Appointments> appointments;
@@ -120,18 +119,18 @@ public class AppointmentController {
      * the callback function is quite messy otherwise
      */
     @FXML private void populateCombos() {
-        ObservableList<Contact> contacts = dba.getContactList();
+        ObservableList<Contact> contacts = ada.getContactList();
         contactCombo.getItems().clear();
         for (Contact c : contacts)
             contactCombo.getItems().add(c.getID());
-        ObservableList<Customer> customers = dba.getAllCustomers();
+        ObservableList<Customer> customers = cda.getAllCustomers();
         customerCombo.getItems().clear();
         for (Customer c : customers)
             customerCombo.getItems().add(c.getID());
         sTimeCombo.getItems().clear();
-        sTimeCombo.getItems().addAll(dba.getTimes());
+        sTimeCombo.getItems().addAll(ada.getTimes());
         eTimeCombo.getItems().clear();
-        eTimeCombo.getItems().addAll(dba.getTimes());
+        eTimeCombo.getItems().addAll(ada.getTimes());
         //Disable unsuitable (past) dates for appointments
         sDateSelector.setDayCellFactory(appointmentDayPicker -> new DateCell() {
             @Override
@@ -155,7 +154,7 @@ public class AppointmentController {
      * The user has clicked Add button, so turn on form
      */
     @FXML private void addClicked() {
-        appointmentField.setText(Integer.toString(dba.getNewAppointmentID()));
+        appointmentField.setText(Integer.toString(ada.getNewAppointmentID()));
         disableFields(false);
         populateCombos();
     }
@@ -217,7 +216,7 @@ public class AppointmentController {
     }
 
     @FXML private void deleteClicked() {
-        dba.setSelectedAppointment(appointTable.getSelectionModel().getSelectedItem());
+        ada.setSelectedAppointment(appointTable.getSelectionModel().getSelectedItem());
         Stage stage = new Stage();
         FXMLLoader fxmlLoader = new FXMLLoader(C195App.class.getResource("ConfirmAppointmentDelete.fxml"));
         try {
@@ -228,7 +227,7 @@ public class AppointmentController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        appointments = dba.getAllAppointments();
+        appointments = ada.getAllAppointments();
         appointTable.getItems().setAll(appointments);
     }
 
@@ -267,12 +266,12 @@ public class AppointmentController {
         int id = (int) customerCombo.getValue();
         LocalDateTime start = sDateSelector.getValue().atTime((LocalTime)sTimeCombo.getValue());
         LocalDateTime end = eDateSelector.getValue().atTime((LocalTime)eTimeCombo.getValue());
-        ObservableList<Appointments> appoint = dba.getAppointmentsByCustomerID(id);
+        ObservableList<Appointments> appoint = ada.getAppointmentsByCustomerID(id);
         for (Appointments appointment : appoint) {
             LocalDateTime appBeg = LocalDateTime.parse(appointment.getStart());
             LocalDateTime appEnd = LocalDateTime.parse(appointment.getEnd());
             //If new appointment falls during duration of old appointment
-            if (dba.getSelectedAppointment().getAppointmentID() != id) {
+            if (ada.getSelectedAppointment() != null && ada.getSelectedAppointment().getAppointmentID() != appointment.getAppointmentID()) {
                 if (((start.isBefore(appEnd)) && (start.isAfter(appBeg) || start.equals(appBeg))) ||
                         ((end.isBefore(appEnd) || end.equals(appEnd)) && (end.isAfter(appBeg)))) {
                     overlaps = true;
@@ -388,12 +387,12 @@ public class AppointmentController {
         appointment = new Appointments(Integer.parseInt(appointmentField.getText()), titleField.getText(), descriptionField.getText(),
                 locationField.getText(), typeField.getText(), start.toString(), end.toString(), (int) customerCombo.getValue(),
                 dba.getCurrentUser().getID(), (int) contactCombo.getValue());
-        if (this.appointments.contains(dba.getAppointmentByID(appointment.getAppointmentID()))) {
-            dba.replaceSelectedAppointment(appointment);
+        if (this.appointments.contains(ada.getAppointmentByID(appointment.getAppointmentID()))) {
+            ada.replaceSelectedAppointment(appointment);
         } else {
-            dba.setNewAppointment(appointment);
+            ada.setNewAppointment(appointment);
         }
-        appointments = dba.getAllAppointments();
+        appointments = ada.getAllAppointments();
         appointTable.getItems().setAll(appointments);
     }
 
@@ -447,10 +446,12 @@ public class AppointmentController {
      */
     @FXML private void initialize() {
         dba = DBAccessor.getInstance();
+        ada = AppointmentsDatabaseAccessor.getInstance();
+        cda = CustomerDatabaseAccessor.getInstance();
         msg = dba.getMsg();
         switcher = StageSwitcher.getInstance();
         localize();
-        appointments = dba.getAllAppointments();
+        appointments = ada.getAllAppointments();
         //Setup TableView
         appointIdCol.setCellValueFactory(new PropertyValueFactory<Appointments, String>("appointmentID"));
         titleCol.setCellValueFactory(new PropertyValueFactory<Appointments, String>("title"));

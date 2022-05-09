@@ -22,6 +22,7 @@ public class CustomerController {
      * Declaring the various resources needed
      */
     private DBAccessor dba;
+    private CustomerDatabaseAccessor cda;
     private ResourceBundle msg;
     private StageSwitcher switcher;
     private ObservableList<Customer> customers;
@@ -77,15 +78,17 @@ public class CustomerController {
      * function, but was needed in the clearForm() function as well to remove errors
      */
     private final ChangeListener listener = (observableValue, old, now) -> {
-        if(now.equals("USA")) {
-            firstLevelCombo.getItems().clear();
-            firstLevelCombo.getItems().addAll("Florida", "Utah", "Washington", "Oregon", "Texas", "New York", "California");
-        } else if (now.equals("France")) {
-            firstLevelCombo.getItems().clear();
-            firstLevelCombo.getItems().addAll("Brittany", "Normandy", "Occitania", "Centre-Val de Loire");
-        } else {
-            firstLevelCombo.getItems().clear();
-            firstLevelCombo.getItems().addAll("Ontario", "Quebec", "New Brunswick",  "Nova Scotia");
+        int cty = 0;
+        firstLevelCombo.getItems().clear();
+        for (Countries c : cda.getCountries()) {
+            if (now.equals(c.getName())) {
+                cty = c.getID();
+            }
+        }
+        for (Divisions d : cda.getDivisions()) {
+            if (d.getCountryID() == cty) {
+                firstLevelCombo.getItems().add(d.getName());
+            }
         }
     };
 
@@ -95,7 +98,9 @@ public class CustomerController {
     private void setUpDropMenu() {
         //Populate Combo Boxes
         countryCombo.getItems().clear();
-        countryCombo.getItems().addAll("USA", "France", "Canada");
+        for (Countries c : cda.getCountries()) {
+            countryCombo.getItems().add(c.getName());
+        }
         countryCombo.getSelectionModel().selectedItemProperty().addListener(listener);
     }
 
@@ -103,7 +108,7 @@ public class CustomerController {
      * This method activates the form below the table with nothing in the fields
      */
     @FXML private void addClicked() {
-        idField.setText(Integer.toString(dba.getNewCustomerID()));
+        idField.setText(Integer.toString(cda.getNewCustomerID()));
         nameField.setDisable(false);
         addressField.setDisable(false);
         postalField.setDisable(false);
@@ -148,7 +153,7 @@ public class CustomerController {
      * Deletes the Customer record if there are no attached appointments
      */
     @FXML private void deleteClicked() {
-        dba.setSelectedCustomer(custTable.getSelectionModel().getSelectedItem());
+        cda.setSelectedCustomer(custTable.getSelectionModel().getSelectedItem());
         Stage stage = new Stage();
         FXMLLoader fxmlLoader = new FXMLLoader(C195App.class.getResource("ConfirmDelete.fxml"));
         try {
@@ -159,7 +164,7 @@ public class CustomerController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        customers = dba.getAllCustomers();
+        customers = cda.getAllCustomers();
         custTable.getItems().setAll(customers);
     }
 
@@ -249,11 +254,11 @@ public class CustomerController {
             Customer customer = getFormState();
             Customer customerOrig = searchCustomers(customer.getID());
             if(customerOrig.getID() != -1 && customers.contains(customerOrig)) {
-                dba.updateCustomer(customerOrig, customer);
+                cda.updateCustomer(customerOrig, customer);
             } else {
-                dba.addCustomer(customer);
+                cda.addCustomer(customer);
             }
-            customers = dba.getAllCustomers();
+            customers = cda.getAllCustomers();
             custTable.getItems().setAll(customers);
             clearForm();
         }
@@ -290,10 +295,11 @@ public class CustomerController {
      */
     @FXML private void initialize() {
         dba = DBAccessor.getInstance();
+        cda = CustomerDatabaseAccessor.getInstance();
         msg = dba.getMsg();
         localize();
         switcher = StageSwitcher.getInstance();
-        customers = dba.getAllCustomers();
+        customers = cda.getAllCustomers();
         //Populate Customer Table
         custIDCol.setCellValueFactory(new PropertyValueFactory<Customer, String>("ID"));
         custNameCol.setCellValueFactory(new PropertyValueFactory<Customer, String>("name"));

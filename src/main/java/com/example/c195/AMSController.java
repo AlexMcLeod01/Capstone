@@ -21,6 +21,7 @@ import java.util.ResourceBundle;
  */
 public class AMSController {
     private DBAccessor dba;
+    private AppointmentsDatabaseAccessor ada;
     private ResourceBundle msg;
     private StageSwitcher switcher;
     private ObservableList<Appointments> weekAppoint;
@@ -163,11 +164,12 @@ public class AMSController {
     @FXML
     private void initialize() {
         dba = DBAccessor.getInstance();
+        ada = AppointmentsDatabaseAccessor.getInstance();
         msg = dba.getMsg();
         localize();
         switcher = StageSwitcher.getInstance();
-        weekAppoint = dba.getWeekAppointments();
-        monthAppoint = dba.getMonthAppointments();
+        weekAppoint = ada.getWeekAppointments();
+        monthAppoint = ada.getMonthAppointments();
 
         //Set up Table 1
         appointCol.setCellValueFactory(new PropertyValueFactory<Appointments, String>("appointmentID"));

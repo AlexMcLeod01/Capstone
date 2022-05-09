@@ -14,6 +14,7 @@ import java.util.ResourceBundle;
  */
 public class ConfirmDeleteController {
     DBAccessor dba;
+    CustomerDatabaseAccessor cda;
     ResourceBundle msg;
 
     //Stuff for the pop up
@@ -28,7 +29,7 @@ public class ConfirmDeleteController {
      * This method deletes the customer selected
      */
     @FXML private void confirmClicked() {
-        dba.deleteCustomer(dba.getSelectedCustomer());
+        cda.deleteCustomer(cda.getSelectedCustomer());
         Stage stage = (Stage) confirmButton.getScene().getWindow();
         stage.close();
     }
@@ -44,6 +45,7 @@ public class ConfirmDeleteController {
 
     @FXML private void initialize() {
         dba = DBAccessor.getInstance();
+        cda = CustomerDatabaseAccessor.getInstance();
         msg = dba.getMsg();
 
         confirmButton.setText(msg.getString("Confirm"));

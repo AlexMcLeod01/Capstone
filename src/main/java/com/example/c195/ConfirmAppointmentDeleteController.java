@@ -13,8 +13,9 @@ import java.util.ResourceBundle;
  * @version 1.0
  */
 public class ConfirmAppointmentDeleteController {
-    DBAccessor dba;
-    ResourceBundle msg;
+    private DBAccessor dba;
+    private AppointmentsDatabaseAccessor ada;
+    private ResourceBundle msg;
 
     //Stuff for the pop up
     //Buttons for the pop up
@@ -28,7 +29,7 @@ public class ConfirmAppointmentDeleteController {
      * This method deletes the customer selected
      */
     @FXML private void confirmClicked() {
-        dba.deleteAppointment(dba.getSelectedAppointment());
+        ada.deleteAppointment(ada.getSelectedAppointment());
         Stage stage = (Stage) confirmButton.getScene().getWindow();
         stage.close();
     }
@@ -48,12 +49,13 @@ public class ConfirmAppointmentDeleteController {
     @FXML private void initialize() {
         //Get instance of DBAccessor and the ResourceBundle
         dba = DBAccessor.getInstance();
+        ada = AppointmentsDatabaseAccessor.getInstance();
         msg = dba.getMsg();
 
         //Localize messages
         confirmButton.setText(msg.getString("Confirm"));
         cancelButton.setText(msg.getString("Cancel"));
-        confirmLabel.setText(msg.getString("SureDeleteAppointment") + "\nAppointment ID: " + dba.getSelectedAppointment().getAppointmentID()
-            + "\nType: " + dba.getSelectedAppointment().getType());
+        confirmLabel.setText(msg.getString("SureDeleteAppointment") + "\nAppointment ID: " + ada.getSelectedAppointment().getAppointmentID()
+            + "\nType: " + ada.getSelectedAppointment().getType());
     }
 }
