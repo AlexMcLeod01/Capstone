@@ -1,18 +1,14 @@
 package com.example.c195;
 
 
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.TableCell;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 
 /**
@@ -34,11 +30,20 @@ public class ReportsController {
 
     //TableViews
     @FXML private TableView<TypeReport> totalTypeReportTable;
+    @FXML private TableView<Appointments> contactScheduleTable;
 
     //TableColumns
     @FXML private TableColumn<TypeReport, String> typeReportTypeCol;
-    @FXML private TableColumn<TypeReport, LocalDate> typeReportMonthCol;
+    @FXML private TableColumn<TypeReport, String> typeReportMonthCol;
     @FXML private TableColumn<TypeReport, String> typeReportNumCol;
+    @FXML private TableColumn<Appointments, String> contactIDCol;
+    @FXML private TableColumn<Appointments, String> appointIDCol;
+    @FXML private TableColumn<Appointments, String> titleCol;
+    @FXML private TableColumn<Appointments, String> typeCol;
+    @FXML private TableColumn<Appointments, String> descrCol;
+    @FXML private TableColumn<Appointments, String> startCol;
+    @FXML private TableColumn<Appointments, String> endCol;
+    @FXML private TableColumn<Appointments, String> custID;
 
 
     @FXML private void backClicked() {
@@ -65,23 +70,16 @@ public class ReportsController {
         //Populate Report Tables
         typeReportNumCol.setCellValueFactory(new PropertyValueFactory<TypeReport, String>("number"));
         typeReportTypeCol.setCellValueFactory(new PropertyValueFactory<TypeReport, String>("type"));
-        //currently not working
-        typeReportMonthCol.setCellFactory(col -> {
-            TableCell<TypeReport, LocalDate> cell = new TableCell<TypeReport, LocalDate>() {
-                private final DateTimeFormatter format = DateTimeFormatter.ofPattern("LLL");
-
-                @Override
-                protected void updateItem(LocalDate month, boolean empty) {
-                    super.updateItem(month, empty);
-                    if(empty || month == null) {
-                        setText(null);
-                    } else {
-                        this.setText(format.format(month));
-                    }
-                }
-            };
-            return cell;
-        });
+        typeReportMonthCol.setCellValueFactory(new PropertyValueFactory<TypeReport, String>("month"));
         totalTypeReportTable.getItems().setAll(dba.getTypeReport());
+        contactIDCol.setCellValueFactory(new PropertyValueFactory<Appointments, String>("contact_id"));
+        appointIDCol.setCellValueFactory(new PropertyValueFactory<Appointments, String>("appointment_id"));
+        titleCol.setCellValueFactory(new PropertyValueFactory<Appointments, String>("title"));
+        typeCol.setCellValueFactory(new PropertyValueFactory<Appointments, String>("type"));
+        descrCol.setCellValueFactory(new PropertyValueFactory<Appointments, String>("description"));
+        startCol.setCellValueFactory(new PropertyValueFactory<Appointments, String>("start"));
+        endCol.setCellValueFactory(new PropertyValueFactory<Appointments, String>("end"));
+        custID.setCellValueFactory(new PropertyValueFactory<Appointments, String>("customer_id"));
+        contactScheduleTable.getItems().setAll(dba.getScheduleReport());
     }
 }

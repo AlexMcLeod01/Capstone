@@ -38,16 +38,16 @@
             <content>
               <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                      <children>
-                        <TableView layoutX="-94.0" layoutY="-43.0" prefHeight="171.2" prefWidth="699.2" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <TableView layoutX="-94.0" layoutY="-43.0" prefHeight="171.2" prefWidth="699.2" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" fx:id="contactScheduleTable">
                           <columns>
-                            <TableColumn prefWidth="75.0" text="Contact #" />
-                            <TableColumn prefWidth="97.60003662109375" text="Appointment ID" />
-                              <TableColumn prefWidth="57.5999755859375" text="Title" />
-                              <TableColumn prefWidth="68.800048828125" text="Type" />
-                              <TableColumn prefWidth="112.0" text="Description" />
-                              <TableColumn prefWidth="109.60003662109375" text="Start Date/Time" />
-                              <TableColumn prefWidth="99.20001220703125" text="End Date/Time" />
-                              <TableColumn prefWidth="77.59991455078125" text="Customer ID" />
+                            <TableColumn prefWidth="75.0" text="Contact #" fx:id="contactIDCol" />
+                            <TableColumn prefWidth="97.60003662109375" text="Appointment ID" fx:id="appointIDCol" />
+                              <TableColumn prefWidth="57.5999755859375" text="Title" fx:id="titleCol" />
+                              <TableColumn prefWidth="68.800048828125" text="Type" fx:id="typeCol" />
+                              <TableColumn prefWidth="112.0" text="Description" fx:id="descrCol" />
+                              <TableColumn prefWidth="109.60003662109375" text="Start Date/Time" fx:id="startCol" />
+                              <TableColumn prefWidth="99.20001220703125" text="End Date/Time" fx:id="endCol" />
+                              <TableColumn prefWidth="77.59991455078125" text="Customer ID" fx:id="custID" />
                           </columns>
                         </TableView>
                      </children>

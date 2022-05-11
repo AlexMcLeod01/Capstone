@@ -10,7 +10,7 @@ import java.time.LocalDate;
  */
 public class TypeReport {
     private String type;
-    private LocalDate month;
+    private String month;
     private int number;
 
     /**
@@ -33,7 +33,7 @@ public class TypeReport {
      * Getter for month
      * @return the LocalDate month
      */
-    public LocalDate getMonth() {
+    public String getMonth() {
         return month;
     }
 
@@ -41,7 +41,7 @@ public class TypeReport {
      * Setter for month
      * @param month as a LocalDate
      */
-    public void setMonth(LocalDate month) {
+    public void setMonth(String month) {
         this.month = month;
     }
 
@@ -67,7 +67,7 @@ public class TypeReport {
      * @param month
      * @param number
      */
-    public TypeReport(String type, LocalDate month, int number) {
+    public TypeReport(String type, String month, int number) {
         setType(type);
         setMonth(month);
         setNumber(number);

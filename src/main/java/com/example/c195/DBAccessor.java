@@ -170,10 +170,30 @@ public final class DBAccessor {
         ObservableList<TypeReport> report = FXCollections.observableList(rep);
         try {
             Connection connection = DriverManager.getConnection(path, username, pass);
-            String sql = "SELECT Type, MONTH(Start), COUNT(*) FROM appointments";
+            String sql = "SELECT Type, MONTHNAME(Start), COUNT(DISTINCT Type, MONTH(Start)) FROM appointments GROUP BY Type, MONTH(Start)";
             ResultSet result = queryDatabase(sql, connection);
             while (result.next()) {
-                report.add(new TypeReport(result.getString(1), LocalDate.of(2022, (int) result.getLong(2), 1), result.getInt(3)));
+                report.add(new TypeReport(result.getString(1), result.getString(2), result.getInt(3)));
+            }
+            connection.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return report;
+    }
+
+    public ObservableList<Appointments> getScheduleReport() {
+        List<Appointments> rep = new ArrayList<>();
+        ObservableList<Appointments> report = FXCollections.observableList(rep);
+        try {
+            Connection connection = DriverManager.getConnection(path, username, pass);
+            String sql = "SELECT * FROM appointments GROUP BY Contact_ID, Start";
+            ResultSet result = queryDatabase(sql, connection);
+            while (result.next()) {
+                Appointments a = new Appointments(result.getInt(1), result.getString(2), result.getString(3),
+                        result.getString(4), result.getString(5), result.getString(6), result.getString(7),
+                        result.getInt(8), result.getInt(9), result.getInt(10));
+                report.add(a);
             }
             connection.close();
         } catch (Exception e) {
