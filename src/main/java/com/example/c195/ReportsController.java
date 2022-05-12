@@ -3,7 +3,6 @@ package com.example.c195;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -20,7 +19,6 @@ import java.util.ResourceBundle;
  */
 public class ReportsController {
     //Begin with the model and view resources
-    private DBAccessor dba;
     private ResourceBundle msg;
     private StageSwitcher switcher;
 
@@ -31,6 +29,7 @@ public class ReportsController {
     //TableViews
     @FXML private TableView<TypeReport> totalTypeReportTable;
     @FXML private TableView<Appointments> contactScheduleTable;
+    @FXML private TableView<UserReport> userModReportTable;
 
     //TableColumns
     @FXML private TableColumn<TypeReport, String> typeReportTypeCol;
@@ -44,6 +43,10 @@ public class ReportsController {
     @FXML private TableColumn<Appointments, String> startCol;
     @FXML private TableColumn<Appointments, String> endCol;
     @FXML private TableColumn<Appointments, String> custID;
+    @FXML private TableColumn<UserReport, String> userIDCol;
+    @FXML private TableColumn<UserReport, String> userTypeCol;
+    @FXML private TableColumn<UserReport, String> userMonthCol;
+    @FXML private TableColumn<UserReport, String> userNumCol;
 
 
     @FXML private void backClicked() {
@@ -56,30 +59,53 @@ public class ReportsController {
         typeReportNumCol.setText(msg.getString("Number"));
         typeReportMonthCol.setText(msg.getString("Month"));
         typeReportTypeCol.setText(msg.getString("Type"));
+        contactIDCol.setText(msg.getString("Contact"));
+        appointIDCol.setText(msg.getString("AppointID"));
+        titleCol.setText(msg.getString("Title"));
+        typeCol.setText(msg.getString("Type"));
+        descrCol.setText(msg.getString("Description"));
+        startCol.setText(msg.getString("StartDateTime"));
+        endCol.setText(msg.getString("EndDateTime"));
+        custID.setText(msg.getString("CustID"));
+        userIDCol.setText(msg.getString("UserID"));
+        userTypeCol.setText(msg.getString("Type"));
+        userMonthCol.setText(msg.getString("Month"));
+        userNumCol.setText(msg.getString("Number"));
     }
 
     /**
      * Initializes the information the page requires to function
      */
     @FXML private void initialize() {
-        dba = DBAccessor.getInstance();
+        DBAccessor dba = DBAccessor.getInstance();
         msg = dba.getMsg();
         switcher = StageSwitcher.getInstance();
         localize();
 
         //Populate Report Tables
-        typeReportNumCol.setCellValueFactory(new PropertyValueFactory<TypeReport, String>("number"));
-        typeReportTypeCol.setCellValueFactory(new PropertyValueFactory<TypeReport, String>("type"));
-        typeReportMonthCol.setCellValueFactory(new PropertyValueFactory<TypeReport, String>("month"));
+        //Number per month per type
+        typeReportNumCol.setCellValueFactory(new PropertyValueFactory<>("number"));
+        typeReportTypeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
+        typeReportMonthCol.setCellValueFactory(new PropertyValueFactory<>("month"));
         totalTypeReportTable.getItems().setAll(dba.getTypeReport());
-        contactIDCol.setCellValueFactory(new PropertyValueFactory<Appointments, String>("contact_id"));
-        appointIDCol.setCellValueFactory(new PropertyValueFactory<Appointments, String>("appointment_id"));
-        titleCol.setCellValueFactory(new PropertyValueFactory<Appointments, String>("title"));
-        typeCol.setCellValueFactory(new PropertyValueFactory<Appointments, String>("type"));
-        descrCol.setCellValueFactory(new PropertyValueFactory<Appointments, String>("description"));
-        startCol.setCellValueFactory(new PropertyValueFactory<Appointments, String>("start"));
-        endCol.setCellValueFactory(new PropertyValueFactory<Appointments, String>("end"));
-        custID.setCellValueFactory(new PropertyValueFactory<Appointments, String>("customer_id"));
+
+        //Contact Schedules
+        contactIDCol.setCellValueFactory(new PropertyValueFactory<>("contactID"));
+        appointIDCol.setCellValueFactory(new PropertyValueFactory<>("appointmentID"));
+        titleCol.setCellValueFactory(new PropertyValueFactory<>("title"));
+        typeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
+        descrCol.setCellValueFactory(new PropertyValueFactory<>("description"));
+        startCol.setCellValueFactory(new PropertyValueFactory<>("start"));
+        endCol.setCellValueFactory(new PropertyValueFactory<>("end"));
+        custID.setCellValueFactory(new PropertyValueFactory<>("customerID"));
         contactScheduleTable.getItems().setAll(dba.getScheduleReport());
+
+        //User number Appointments set/edit
+        userIDCol.setCellValueFactory(new PropertyValueFactory<>("userID"));
+        userTypeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
+        userMonthCol.setCellValueFactory(new PropertyValueFactory<>("month"));
+        userNumCol.setCellValueFactory(new PropertyValueFactory<>("number"));
+        userModReportTable.getItems().setAll(dba.getUserReport());
+
     }
 }
