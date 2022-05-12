@@ -229,7 +229,7 @@ public final class DBAccessor {
 
     /**
      * Queries the Database and returns an Observable list of UserReport objects
-     * @return ObservableList<UserReport>
+     * @return ObservableList UserReport
      */
     public ObservableList<UserReport> getUserReport() {
         List<UserReport> rep = new ArrayList<>();
