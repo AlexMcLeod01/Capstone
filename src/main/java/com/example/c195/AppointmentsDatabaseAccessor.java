@@ -20,10 +20,8 @@ import java.util.List;
 public final class AppointmentsDatabaseAccessor {
     //Appointment Screen variables
     private DBAccessor dba;
-    private int appointmentID;
     private ObservableList<Appointments> appointments;
     private Appointments selectedAppointment;
-    private ObservableList<Contact> contacts;
     private ObservableList<LocalTime> times;
 
     /**
@@ -41,7 +39,7 @@ public final class AppointmentsDatabaseAccessor {
 
     /**
      * Converting datetimes from UTC to local time zone
-     * @param dateTime
+     * @param dateTime A LocalDateTime object in UTC
      * @return time at local machine
      */
     public LocalDateTime convertFromUTC(LocalDateTime dateTime) {
@@ -95,7 +93,7 @@ public final class AppointmentsDatabaseAccessor {
      * @return ObservableList of Appointment Objects
      */
     public ObservableList<Appointments> getWeekAppointments() {
-        List<Appointments> list = new ArrayList<Appointments>();
+        List<Appointments> list = new ArrayList<>();
         ObservableList<Appointments> weekAppoint = FXCollections.observableList(list);
         for (Appointments a : this.appointments) {
             LocalDate aDate = LocalDate.parse(a.getStart().substring(0, 10));
@@ -112,7 +110,7 @@ public final class AppointmentsDatabaseAccessor {
      * @return ObservableList of Appointment objects
      */
     public ObservableList<Appointments> getMonthAppointments() {
-        List<Appointments> list = new ArrayList<Appointments>();
+        List<Appointments> list = new ArrayList<>();
         ObservableList<Appointments> monthAppoint = FXCollections.observableList(list);
         for (Appointments a : appointments) {
             LocalDate aDate = LocalDate.parse(a.getStart().substring(0, 10));
@@ -246,7 +244,6 @@ public final class AppointmentsDatabaseAccessor {
      */
     public void clearSelectedAppointment() {
         this.selectedAppointment = null;
-        return;
     }
 
     /**
@@ -299,17 +296,6 @@ public final class AppointmentsDatabaseAccessor {
         return customerAppointments;
     }
 
-    private void setExampleContactList() {
-        List<Contact> contact = new ArrayList<>();
-        contacts = FXCollections.observableList(contact);
-        Contact c1 = new Contact(1, "Yue");
-        Contact c2 = new Contact(2, "Spock");
-        Contact c3 = new Contact(3, "Yoda");
-        contacts.add(c1);
-        contacts.add(c2);
-        contacts.add(c3);
-    }
-
     /**
      * Creates a list of times for use elsewhere
      */
@@ -336,27 +322,25 @@ public final class AppointmentsDatabaseAccessor {
     }
 
     /**
-     * Getter for contact list
-     * @return
+     * Access database and return an ObservableList of Contact objects
+     * @return ObservableList<Contact>
      */
     public ObservableList<Contact> getContactList() {
-        setExampleContactList();
-        return contacts;
-    }
-
-    /**
-     * Gets the Contact that has this ID number
-     * @param Id contact's ID number
-     * @return Contact
-     */
-    public Contact getContactByID(int Id) {
-        Contact contact = new Contact(-1, "");
-        for  (Contact con : contacts) {
-            if (con.getID() == Id) {
-                contact = con;
+        List<Contact> contact = new ArrayList<>();
+        ObservableList<Contact> contacts = FXCollections.observableList(contact);
+        try {
+            Connection connection = DriverManager.getConnection(dba.getPath(), dba.getUsername(), dba.getPass());
+            String sql = "SELECT * FROM contacts";
+            ResultSet resultSet = dba.queryDatabase(sql, connection);
+            while (resultSet.next()) {
+                Contact c = new Contact(resultSet.getInt(1), resultSet.getString(2));
+                contacts.add(c);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        return contact;
+
+        return contacts;
     }
 
     /**
