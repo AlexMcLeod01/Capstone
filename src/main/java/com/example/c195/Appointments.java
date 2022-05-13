@@ -123,7 +123,7 @@ public class Appointments {
 
     /**
      * Setter for customerID
-     * @param customerID
+     * @param customerID int
      */
     public void setCustomerID(int customerID) {
         this.customerID = customerID;

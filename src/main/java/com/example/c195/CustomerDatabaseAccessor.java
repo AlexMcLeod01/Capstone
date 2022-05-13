@@ -65,7 +65,7 @@ public final class CustomerDatabaseAccessor {
 
     /**
      * Queries the database and returns all the first-level divisions
-     * @return
+     * @return ObservableList of Divisions objects
      */
     public ObservableList<Divisions> getDivisions() {
         if (divisions == null) {
@@ -93,7 +93,7 @@ public final class CustomerDatabaseAccessor {
     /**
      * This method returns an observable list of Customer objects
      * from database information
-     * @return
+     * @return ObservableList of Customer objects
      */
     public ObservableList<Customer> getAllCustomers() {
         if (customers == null) {

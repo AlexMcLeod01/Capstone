@@ -63,9 +63,9 @@ public class TypeReport {
 
     /**
      * Constructor for object TypeReport
-     * @param type
-     * @param month
-     * @param number
+     * @param type String
+     * @param month String
+     * @param number int
      */
     public TypeReport(String type, String month, int number) {
         setType(type);

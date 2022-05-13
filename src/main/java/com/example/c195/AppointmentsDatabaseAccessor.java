@@ -187,6 +187,8 @@ public final class AppointmentsDatabaseAccessor {
 
     /**
      * Converts Time to UTC from local time zone
+     * @return LocalDateTime object converted to local timezone from UTC
+     * @param dateTime LocalDateTime
      */
     public LocalDateTime convertToUTC(LocalDateTime dateTime) {
         ZonedDateTime zoned = dateTime.atZone(dba.getZone());
@@ -329,6 +331,7 @@ public final class AppointmentsDatabaseAccessor {
 
     /**
      * Returns the ObservableList times for use in Appointment time data
+     * @return ObservableList of LocalTime objects
      */
     public ObservableList<LocalTime> getTimes() {
         if (times.isEmpty()) {
@@ -339,7 +342,7 @@ public final class AppointmentsDatabaseAccessor {
 
     /**
      * Access database and return an ObservableList of Contact objects
-     * @return ObservableList<Contact>
+     * @return ObservableList Contact
      */
     public ObservableList<Contact> getContactList() {
         List<Contact> contact = new ArrayList<>();

@@ -37,7 +37,7 @@ public class User {
 
     /**
      * Setter for user ID
-     * @param ID
+     * @param ID int
      */
     public void setID(int ID) {
         this.ID = ID;

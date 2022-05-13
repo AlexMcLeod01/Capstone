@@ -43,8 +43,8 @@ public class Countries {
 
     /**
      * Simple constructor for Countries
-     * @param id
-     * @param name
+     * @param id int
+     * @param name String
      */
     public Countries(int id, String name) {
         setID(id);
