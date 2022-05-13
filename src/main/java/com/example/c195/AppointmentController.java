@@ -122,11 +122,11 @@ public class AppointmentController {
         ObservableList<Contact> contacts = ada.getContactList();
         contactCombo.getItems().clear();
         for (Contact c : contacts)
-            contactCombo.getItems().add(c.getID());
+            contactCombo.getItems().add(c.getName());
         ObservableList<Customer> customers = cda.getAllCustomers();
         customerCombo.getItems().clear();
         for (Customer c : customers)
-            customerCombo.getItems().add(c.getID());
+            customerCombo.getItems().add(Integer.toString(c.getID()));
         sTimeCombo.getItems().clear();
         sTimeCombo.getItems().addAll(ada.getTimes());
         eTimeCombo.getItems().clear();
@@ -169,12 +169,16 @@ public class AppointmentController {
         descriptionField.setText(selected.getDescription());
         locationField.setText(selected.getLocation());
         typeField.setText(selected.getType());
-        contactCombo.getSelectionModel().select(selected.getContactID());
+        String name = "";
+        for (Contact c : ada.getContactList())
+            if (c.getID() == selected.getContactID())
+                name = c.getName();
+        contactCombo.getSelectionModel().select(name);
         sDateSelector.setValue(LocalDate.parse(selected.getStart().substring(0, 10)));
         sTimeCombo.setValue(LocalTime.parse(selected.getStart().substring(11)));
         eDateSelector.setValue(LocalDate.parse(selected.getEnd().substring(0, 10)));
         eTimeCombo.setValue(LocalTime.parse(selected.getEnd().substring(11)));
-        customerCombo.getSelectionModel().select(selected.getCustomerID());
+        customerCombo.getSelectionModel().select(Integer.toString(selected.getCustomerID()));
 
     }
 
@@ -210,9 +214,11 @@ public class AppointmentController {
      * and fill it out with selected appointment
      */
     @FXML private void updateClicked() {
-        disableFields(false);
-        populateCombos();
-        setFields();
+        if (appointTable.getSelectionModel().getSelectedItem() != null) {
+            disableFields(false);
+            populateCombos();
+            setFields();
+        }
     }
 
     @FXML private void deleteClicked() {
@@ -258,22 +264,24 @@ public class AppointmentController {
     }
 
     /**
-     * Checks if the Customer's appointments overlap
+     * Checks if the appointments overlap
      * @return true if overlaps
      */
-    @FXML private boolean doesCustomerOverlap() {
+    @FXML private boolean doesOverlap(ObservableList<Appointments> appoint) {
         boolean overlaps = false;
-        int id = (int) customerCombo.getValue();
+        int id = Integer.parseInt((String)customerCombo.getValue());
+        int apID = Integer.parseInt(appointmentField.getText());
         LocalDateTime start = sDateSelector.getValue().atTime((LocalTime)sTimeCombo.getValue());
         LocalDateTime end = eDateSelector.getValue().atTime((LocalTime)eTimeCombo.getValue());
-        ObservableList<Appointments> appoint = ada.getAppointmentsByCustomerID(id);
         for (Appointments appointment : appoint) {
             LocalDateTime appBeg = LocalDateTime.parse(appointment.getStart());
             LocalDateTime appEnd = LocalDateTime.parse(appointment.getEnd());
             //If new appointment falls during duration of old appointment
-            if (ada.getSelectedAppointment() != null && ada.getSelectedAppointment().getAppointmentID() != appointment.getAppointmentID()) {
-                if (((start.isBefore(appEnd)) && (start.isAfter(appBeg) || start.equals(appBeg))) ||
-                        ((end.isBefore(appEnd) || end.equals(appEnd)) && (end.isAfter(appBeg)))) {
+            if (apID != appointment.getAppointmentID()) {
+                if ((start.isBefore(appEnd)) && (start.isAfter(appBeg) || start.equals(appBeg))) {
+                    overlaps = true;
+                }
+                if ((end.isBefore(appEnd) || end.equals(appEnd)) && (end.isAfter(appBeg))) {
                     overlaps = true;
                 }
                 if (start.isBefore(appBeg) && end.isAfter(appEnd)) {
@@ -295,25 +303,25 @@ public class AppointmentController {
             valid = false;
             timeValid = false;
         }
-        if (sDateSelector.getValue() == null) {
+        if (valid && sDateSelector.getValue() == null) {
             sDateSelector.setPromptText(msg.getString("Required"));
             valid = false;
             timeValid = false;
         }
-        if (!validCombo(sTimeCombo)) {
+        if (valid && !validCombo(sTimeCombo)) {
             valid = false;
             timeValid = false;
         }
-        if (eDateSelector.getValue() == null) {
+        if (valid && eDateSelector.getValue() == null) {
             eDateSelector.setPromptText(msg.getString("Required"));
             valid = false;
             timeValid = false;
         }
-        if (!validCombo(eTimeCombo)) {
+        if (valid && !validCombo(eTimeCombo)) {
             valid = false;
             timeValid = false;
         }
-        if (timeValid) {
+        if (valid && timeValid) {
             //Check times against EST Business Hours
             LocalDateTime begin = sDateSelector.getValue().atTime((LocalTime) sTimeCombo.getSelectionModel().getSelectedItem());
             ZonedDateTime beginZoned = begin.atZone(dba.getZone());
@@ -327,28 +335,49 @@ public class AppointmentController {
                 eTimeCombo.getSelectionModel().clearSelection();
                 valid = false;
             }
-            if (end.minus(14, HOURS).isAfter(begin)) {
+            if (valid && end.minus(14, HOURS).isAfter(begin)) {
                 eTimeCombo.getSelectionModel().clearSelection();
                 errorLabel.setText(msg.getString("OutsideHours"));
                 eTimeCombo.setStyle("-fx-font-weight: bold;");
                 valid = false;
-            } else if (end.equals(begin)) {
+            }
+            if (valid && end.equals(begin)) {
                 eTimeCombo.getSelectionModel().clearSelection();
                 errorLabel.setText(msg.getString("TooShort"));
                 valid = false;
-            } else if (beginEST.getHour() < 8 || beginEST.getHour() > 21) {
+            }
+            if (valid && beginEST.getHour() < 8 || beginEST.getHour() > 21) {
                 sDateSelector.setValue(null);
                 errorLabel.setText(msg.getString("OutsideHours"));
                 valid = false;
-            } else if (endEST.getHour() < 9 || endEST.getHour() > 22) {
+            }
+            if (valid && endEST.getHour() < 9 || endEST.getHour() > 22) {
                 eDateSelector.setValue(null);
                 errorLabel.setText(msg.getString("OutsideHours"));
                 valid = false;
-            } else if (doesCustomerOverlap()) {
+            }
+            int id = Integer.parseInt((String)customerCombo.getValue());
+            if (valid && doesOverlap(ada.getAppointmentsByCustomerID(id))) {
+                sTimeCombo.getSelectionModel().clearSelection();
                 eTimeCombo.getSelectionModel().clearSelection();
                 errorLabel.setText(msg.getString("CustomerOverlap"));
                 valid = false;
             }
+            String name = (String) contactCombo.getValue();
+            for (Contact c : ada.getContactList()) {
+                if (c.getName().equals(name)) {
+                    id = c.getID();
+                }
+            }
+            if (valid && doesOverlap(ada.getAppointmentsByContactID(id))) {
+                sTimeCombo.getSelectionModel().clearSelection();
+                eTimeCombo.getSelectionModel().clearSelection();
+                errorLabel.setText(msg.getString("ContactOverlap"));
+                valid = false;
+            }
+        }
+        if (valid) {
+            errorLabel.setText("");
         }
         return valid;
     }
@@ -384,9 +413,17 @@ public class AppointmentController {
         Appointments appointment;
         LocalDateTime start = sDateSelector.getValue().atTime((LocalTime) sTimeCombo.getValue());
         LocalDateTime end = eDateSelector.getValue().atTime((LocalTime) eTimeCombo.getValue());
+        int contact = 0;
+        for (Contact c: ada.getContactList()) {
+            String s = (String) contactCombo.getValue();
+            if (c.getName().equals(s)) {
+                contact = c.getID();
+            }
+        }
+
         appointment = new Appointments(Integer.parseInt(appointmentField.getText()), titleField.getText(), descriptionField.getText(),
-                locationField.getText(), typeField.getText(), start.toString(), end.toString(), (int) customerCombo.getValue(),
-                dba.getCurrentUser().getID(), (int) contactCombo.getValue());
+                locationField.getText(), typeField.getText(), start.toString(), end.toString(), Integer.parseInt((String)customerCombo.getValue()),
+                dba.getCurrentUser().getID(), contact);
         if (this.appointments.contains(ada.getAppointmentByID(appointment.getAppointmentID()))) {
             ada.replaceSelectedAppointment(appointment);
         } else {

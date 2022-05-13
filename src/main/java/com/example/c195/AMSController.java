@@ -106,7 +106,7 @@ public class AMSController {
             LocalDateTime start = LocalDateTime.parse(a.getStart());
             LocalDateTime now = LocalDateTime.now();
             Duration duration = Duration.between(now, start);
-            if (duration.toMinutes() <= 15) {
+            if (duration.toMinutes() <= 15 && duration.toMinutes() >= -15) {
                 alert.setText(msg.getString("UpcomingAlert") + "\nAppointment ID: " + a.getAppointmentID() + " Date: " +
                         LocalDate.parse(a.getStart().substring(0,10)) + " Time: " + LocalTime.parse(a.getStart().substring(11)));
             }
@@ -184,7 +184,7 @@ public class AMSController {
 
         //Set up Table 2
         appointCol1.setCellValueFactory(new PropertyValueFactory<>("appointmentID"));
-        titleCol1.setCellValueFactory(new PropertyValueFactory<>("title"));
+        titleCol1.setCellValueFactory(new PropertyValueFactory<Appointments, String>("title"));
         descrCol1.setCellValueFactory(new PropertyValueFactory<>("description"));
         locCol1.setCellValueFactory(new PropertyValueFactory<>("location"));
         typeCol1.setCellValueFactory(new PropertyValueFactory<>("type"));

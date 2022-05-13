@@ -165,7 +165,7 @@ public final class AppointmentsDatabaseAccessor {
                     "User_ID, Contact_ID) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
             PreparedStatement prepared = connection.prepareStatement(sql);
             prepared.setInt(1, appointment.getAppointmentID());
-            prepared.setString(2, appointment.getType());
+            prepared.setString(2, appointment.getTitle());
             prepared.setString(3, appointment.getDescription());
             prepared.setString(4, appointment.getLocation());
             prepared.setString(5, appointment.getType());
@@ -294,6 +294,22 @@ public final class AppointmentsDatabaseAccessor {
             }
         }
         return customerAppointments;
+    }
+
+    /**
+     * This method returns an observable list of appointments that are scheduled with a single contact
+     * @param Id Contact ID
+     * @return ObservableList of Appointment objects
+     */
+    public ObservableList<Appointments> getAppointmentsByContactID(int Id) {
+        List<Appointments> list = new ArrayList<>();
+        ObservableList<Appointments> contactAppointments = FXCollections.observableList(list);
+        for (Appointments appoint : appointments) {
+            if (appoint.getContactID() == Id) {
+                contactAppointments.add(appoint);
+            }
+        }
+        return contactAppointments;
     }
 
     /**

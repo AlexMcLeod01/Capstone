@@ -187,7 +187,7 @@ public final class DBAccessor {
         ObservableList<TypeReport> report = FXCollections.observableList(rep);
         try {
             Connection connection = DriverManager.getConnection(path, username, pass);
-            String sql = "SELECT Type, MONTHNAME(Start), COUNT(DISTINCT Type, MONTH(Start)) FROM appointments GROUP BY Type, MONTH(Start)";
+            String sql = "SELECT DISTINCT Type, MONTHNAME(Start), COUNT(*) FROM appointments GROUP BY Type, MONTH(Start) ORDER BY Type";
             ResultSet result = queryDatabase(sql, connection);
             while (result.next()) {
                 report.add(new TypeReport(result.getString(1), result.getString(2), result.getInt(3)));
@@ -210,7 +210,7 @@ public final class DBAccessor {
         AppointmentsDatabaseAccessor ada = AppointmentsDatabaseAccessor.getInstance();
         try {
             Connection connection = DriverManager.getConnection(path, username, pass);
-            String sql = "SELECT * FROM appointments GROUP BY Contact_ID, Start";
+            String sql = "SELECT * FROM appointments GROUP BY Contact_ID, start ORDER BY Contact_ID ASC, start DESC";
             ResultSet result = queryDatabase(sql, connection);
             while (result.next()) {
                 LocalDateTime start = ada.convertFromUTC(result.getDate(6).toLocalDate().atTime(result.getTime(6).toLocalTime()));
@@ -236,7 +236,7 @@ public final class DBAccessor {
         ObservableList<UserReport> report = FXCollections.observableList(rep);
         try {
             Connection connection = DriverManager.getConnection(getPath(), getUsername(), getPass());
-            String sql = "SELECT user_id, type, MONTHNAME(start), COUNT(DISTINCT user_id, type, MONTH(start)) FROM appointments GROUP BY user_id, type";
+            String sql = "SELECT user_id, type, MONTHNAME(start), COUNT(*) FROM appointments GROUP BY user_id, type ORDER BY user_id";
             ResultSet result = queryDatabase(sql, connection);
             while (result.next()) {
                 UserReport u = new UserReport(result.getInt(1), result.getString(2), result.getString(3), result.getInt(4));
