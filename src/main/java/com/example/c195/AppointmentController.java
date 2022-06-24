@@ -17,6 +17,9 @@ import static java.time.temporal.ChronoUnit.HOURS;
 
 /**
  * This is the controller for the appointment records view
+ * <p>
+ * Implemented populateCombos method through lambda functions because
+ * the callback function is quite messy otherwise
  * @author Harold Alex McLeod
  * @version 1.0
  */

@@ -99,7 +99,7 @@ public final class DBAccessor {
             sql = "SELECT MAX(contact_id) FROM contacts";
             ResultSet result1 = queryDatabase(sql, connection);
             while (result1.next()) {
-                int cId = result1.getInt(1);
+                int cId = result1.getInt(1) + 1;
                 if (cId > id) {
                     id = cId;
                 }
