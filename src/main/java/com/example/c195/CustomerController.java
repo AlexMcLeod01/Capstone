@@ -1,6 +1,7 @@
 package com.example.c195;
 
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -14,6 +15,10 @@ import java.util.ResourceBundle;
 
 /**
  * This class controls the Customer Records window
+ * <p>
+ * For the ChangeListener listener:
+ * Lambda was the clearest way to make a listener for the single listener that was needed,
+ * and I didn't want to change the declaration when I made it a class-level private variable
  * @author Harold Alex McLeod
  * @version 1.0
  */
@@ -76,6 +81,8 @@ public class CustomerController {
     /**
      * A ChangeListener for the Country ComboBox. It was originally in the setUpDropMenu()
      * function, but was needed in the clearForm() function as well to remove errors
+     * At the time, lambda was the clearest way to make a listener, and I didn't want to change
+     * the declaration when I made it a class-level private variable
      */
     private final ChangeListener listener = (observableValue, old, now) -> {
         int cty = 0;

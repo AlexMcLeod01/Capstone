@@ -41,6 +41,8 @@ public class LoginFormController {
     private Button submitButton;
     @FXML
     private Button cancelButton;
+    @FXML
+    private Button newUserButton;
 
     /**
      * This method exits the application upon click
@@ -92,6 +94,15 @@ public class LoginFormController {
     }
 
     /**
+     * Opens the new user form
+     */
+    @FXML
+    private void newUserClicked() {
+        Stage stage = (Stage) newUserButton.getScene().getWindow();
+        switcher.SwitchStage(stage, "NewUser.fxml", msg.getString("NewUserTitle"));
+    }
+
+    /**
      * Does localization stuff
      */
     @FXML
@@ -102,6 +113,7 @@ public class LoginFormController {
         userLabel.setText(msg.getString("LoginUser"));
         passLabel.setText(msg.getString("LoginPass"));
         header.setText(msg.getString("LoginLabel"));
+        newUserButton.setText(msg.getString("NewUser"));
     }
 
     /**

@@ -33,6 +33,9 @@ public final class DBAccessor {
     private File loginFile;
     private User currentUser;
 
+    //New User screen variables
+    private int newUserId;
+
 
     /**
      * initializes INSTANCE as the singleton DBAccessor
@@ -69,6 +72,42 @@ public final class DBAccessor {
      */
     public String getPass() {
         return pass;
+    }
+
+    /**
+     * Getter for newUserId
+     * @return newUserId
+     */
+    public int getNewUserId() {
+        int id = newUserId;
+        newUserId++;
+        return id;
+    }
+
+    /**
+     * Sets the newUserId based upon the highest int user_id in users
+     */
+    private void setNewUserId() {
+        int id = 1;
+        try {
+            Connection connection = DriverManager.getConnection(path, username, pass);
+            String sql = "SELECT MAX(user_id) FROM users";
+            ResultSet result = queryDatabase(sql, connection);
+            while (result.next()) {
+                id = result.getInt(1) + 1;
+            }
+            sql = "SELECT MAX(contact_id) FROM contacts";
+            ResultSet result1 = queryDatabase(sql, connection);
+            while (result1.next()) {
+                int cId = result1.getInt(1);
+                if (cId > id) {
+                    id = cId;
+                }
+            }
+            newUserId = id;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /*********************************************************************************************************
@@ -116,7 +155,11 @@ public final class DBAccessor {
             String sql = "SELECT user_name FROM users";
             ResultSet result = queryDatabase(sql, connection);
             while (result.next()) {
-                if (user.equals(result.getString(1))) {
+                String r = result.getString(1);
+                if (r.length() > user.length() && user.equals(r.substring(0, user.length()))) {
+                    return true;
+                }
+                if (user.equals(r) && !(user.contains("/p") || user.contains("/c"))) {
                     return true;
                 }
             }
@@ -138,19 +181,44 @@ public final class DBAccessor {
      * @return true if username and password match pair in database
      */
     public boolean userPass(String user, String password) {
+        String admin = "/p";
+        String contact = "/c";
         try {
             Connection connection = DriverManager.getConnection(path, username, pass);
             String sql = "SELECT user_name, password, user_id FROM users";
             ResultSet result = queryDatabase(sql, connection);
             Date date = new Date(System.currentTimeMillis());
             while (result.next()) {
-                if (user.equals(result.getString(1))) {
+                String r = result.getString(1);
+                if ((r.length() > user.length()) && (user.equals(r.substring(0, user.length())))) {
                     if(password.equals(result.getString(2))) {
+                        String type = r.substring(user.length());
+                        int id = result.getInt(3);
+
                         String mes = "\nSuccessful Login:\nUsername: " + user + "\nDate: " + format.format(date);
                         Write(mes);
-                        currentUser = new User(user, result.getInt(3));
+
+                        if (type.equals(admin)) {
+                            currentUser = new Admin(user, id);
+                        }
+                        if (contact.equals(type.substring(0, 2))) {
+                            currentUser = new Rep(user, id, Integer.parseInt(type.substring(2)));
+                        }
                         return true;
 
+                    }
+                }
+                //This portion is only in here to correct older style username saves in the database, if they exist
+                if (user.equals(r)) {
+                    if(password.equals(result.getString(2))) {
+                        int id = result.getInt(3);
+
+                        String mes = "\nSuccessful Login:\nUsername: " + user + "\nDate: " + format.format(date);
+                        Write(mes);
+
+                        currentUser = new Admin(user, id);
+                        updateUser(user + admin, id);
+                        return true;
                     }
                 }
             }
@@ -169,6 +237,99 @@ public final class DBAccessor {
      */
     public User getCurrentUser() {
         return currentUser;
+    }
+
+    /**
+     * This function just updates the username of a user, mostly for backward compatibility
+     * @param updatedUsername
+     * @param ID
+     */
+    private void updateUser(String updatedUsername, int ID) {
+        try {
+            Connection connection = DriverManager.getConnection(path, username, pass);
+            String sql = "UPDATE users SET user_name = ? WHERE user_id = ?";
+            PreparedStatement prepared = connection.prepareStatement(sql);
+            prepared.setString(1, updatedUsername);
+            prepared.setInt(2, ID);
+            prepared.executeUpdate();
+            connection.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Adds a user to the users table
+     * @param user
+     * @param pwd
+     */
+    public void addUser(User user, String pwd) {
+        boolean valid = true;
+        String name = "";
+        if (user instanceof Rep) {
+            name = user.getName() + "/c" + ((Rep) user).getContactID();
+        }
+        if (user instanceof Admin) {
+            name = user.getName() + "/p";
+        }
+        try {
+            Connection connection = DriverManager.getConnection(path, username, pass);
+            String sql = "SELECT user_name FROM users";
+            ResultSet result = queryDatabase(sql, connection);
+            while (result.next()) {
+                if (user.getName().equals(result.getString(1))) {
+                    valid = false;
+                }
+            }
+            if (valid) {
+                sql = "INSERT INTO users (user_name, password, user_id," +
+                        "Create_Date, Created_By, Last_Update, Last_Updated_By) " +
+                        " values (?, ?, ?, ?, ?, ?, ?);";
+                PreparedStatement prepared = connection.prepareStatement(sql);
+                prepared.setString(1, name);
+                prepared.setString(2, pwd);
+                prepared.setInt(3, user.getID());
+                prepared.setTimestamp(4, Timestamp.valueOf(convertToUTC(LocalDateTime.now())));
+                prepared.setString(5, user.getName());
+                prepared.setTimestamp(6, Timestamp.valueOf(convertToUTC(LocalDateTime.now())));
+                prepared.setString(7, user.getName());
+                prepared.executeUpdate();
+                connection.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Adds a contact to the contact table
+     * @param contact
+     * @param email
+     */
+    public void addContact(Contact contact, String email) {
+        try {
+            Connection connection = DriverManager.getConnection(path, username, pass);
+            String sql = "INSERT INTO contacts (contact_id, contact_name, email) " +
+                    " values (?, ?, ?);";
+            PreparedStatement prepared = connection.prepareStatement(sql);
+            prepared.setInt(1, contact.getID());
+            prepared.setString(2, contact.getName());
+            prepared.setString(3, email);
+            prepared.executeUpdate();
+            connection.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Converts Time to UTC from local time zone
+     * @return LocalDateTime object converted to local timezone from UTC
+     * @param dateTime LocalDateTime
+     */
+    private LocalDateTime convertToUTC(LocalDateTime dateTime) {
+        ZonedDateTime zoned = dateTime.atZone(getZone());
+        return zoned.withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
     }
 
 
@@ -283,5 +444,6 @@ public final class DBAccessor {
                 e.printStackTrace();
             }
         }
+        setNewUserId();
     }
 }

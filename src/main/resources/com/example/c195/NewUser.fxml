@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="331.0" prefWidth="440.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.c195.NewUserController">
+   <children>
+      <Label layoutX="193.0" layoutY="33.0" style="-fx-font-weight: bold;" text="New User" />
+      <Label fx:id="errorLabel" layoutX="77.0" layoutY="62.0" visible="false" textFill="#c41212" />
+      <Label layoutX="77.0" layoutY="96.0" text="Username:" />
+      <TextField fx:id="usernameField" layoutX="203.0" layoutY="92.0" />
+      <Label layoutX="77.0" layoutY="145.0" text="Password:" />
+      <TextField fx:id="passField" layoutX="204.0" layoutY="141.0" />
+      <Label layoutX="77.0" layoutY="179.0" text="Re-Enter Password:" />
+      <TextField fx:id="passConfirmField" layoutX="205.0" layoutY="175.0" />
+      <Label layoutX="77.0" layoutY="224.0" text="Name:" />
+      <TextField fx:id="nameField" layoutX="206.0" layoutY="220.0" />
+      <Button fx:id="cancelButton" layoutX="104.0" layoutY="270.0" mnemonicParsing="false" text="Cancel" onMouseClicked="#cancelClicked" />
+      <Button fx:id="saveButton" layoutX="294.0" layoutY="270.0" mnemonicParsing="false" text="Save" onMouseClicked="#saveClicked" />
+   </children>
+</AnchorPane>
