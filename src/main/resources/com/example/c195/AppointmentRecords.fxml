@@ -10,55 +10,56 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="581.0" prefWidth="938.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.c195.AppointmentController">
-   <children>
-      <Label layoutX="374.0" layoutY="26.0" text="Scheduled Appointments" fx:id="headingLabel">
-         <font>
-            <Font name="System Bold" size="16.0" />
-         </font>
-      </Label>
-      <TableView layoutX="23.0" layoutY="78.0" prefHeight="200.0" prefWidth="892.0" fx:id="appointTable" >
-        <columns>
-          <TableColumn prefWidth="102.4000244140625" text="Appointment ID" fx:id="appointIdCol" />
-          <TableColumn prefWidth="48.0" text="Title" fx:id="titleCol" />
-            <TableColumn prefWidth="75.0" text="Description" fx:id="descrCol" />
-            <TableColumn prefWidth="80.80006408691406" text="Location" fx:id="locCol" />
-            <TableColumn prefWidth="68.800048828125" text="Contact" fx:id="contactCol" />
-            <TableColumn prefWidth="79.99993896484375" text="Type" fx:id="typeCol" />
-            <TableColumn prefWidth="149.60003662109375" text="Start Date/Time" fx:id="sDateTimeCol" />
-            <TableColumn prefWidth="133.5999755859375" text="End Date/Time" fx:id="eDateTimeCol" />
-            <TableColumn prefWidth="84.800048828125" text="Customer ID" fx:id="custIdCol" />
-            <TableColumn prefWidth="65.599853515625" text="User ID" fx:id="userIdCol" />
-        </columns>
-      </TableView>
-      <Button layoutX="23.0" layoutY="297.0" mnemonicParsing="false" text="Back" fx:id="backButton" onMouseClicked="#backClicked" />
-      <Button layoutX="727.0" layoutY="297.0" mnemonicParsing="false" text="Add" fx:id="addButton" onMouseClicked="#addClicked" />
-      <Button layoutX="786.0" layoutY="297.0" mnemonicParsing="false" text="Update" fx:id="updateButton" onMouseClicked="#updateClicked" />
-      <Button layoutX="865.0" layoutY="297.0" mnemonicParsing="false" text="Delete" fx:id="deleteButton" onMouseClicked="#deleteClicked" />
-      <Label fx:id="appointmentLabel" layoutX="23.0" layoutY="360.0" text="Appointment ID:" />
-      <TextField fx:id="appointmentField" disable="true" layoutX="135.0" layoutY="356.0" />
-      <Label fx:id="titleLabel" layoutX="23.0" layoutY="402.0" text="Title:" />
-      <TextField fx:id="titleField" disable="true" layoutX="135.0" layoutY="398.0" />
-      <Label fx:id="descriptionLabel" layoutX="23.0" layoutY="446.0" text="Description:" />
-      <TextField fx:id="descriptionField" disable="true" layoutX="136.0" layoutY="442.0" />
-      <Label fx:id="locationLabel" layoutX="25.0" layoutY="494.0" text="Location:" />
-      <TextField fx:id="locationField" disable="true" layoutX="137.0" layoutY="490.0" />
-      <Label fx:id="contactLabel" layoutX="366.0" layoutY="360.0" text="Contact:" />
-      <ComboBox fx:id="contactCombo" disable="true" layoutX="438.0" layoutY="356.0" prefWidth="150.0" />
-      <Label fx:id="typeLabel" layoutX="367.0" layoutY="402.0" text="Type:" />
-      <TextField fx:id="typeField" disable="true" layoutX="438.0" layoutY="398.0" />
-      <Label fx:id="sDateLabel" layoutX="368.0" layoutY="446.0" text="Start Date:" />
-      <DatePicker fx:id="sDateSelector" disable="true" layoutX="438.0" layoutY="442.0" />
-      <Label fx:id="sTimeLabel" layoutX="368.0" layoutY="494.0" text="Start Time:" />
-      <ComboBox fx:id="sTimeCombo" disable="true" layoutX="438.0" layoutY="490.0" prefWidth="150.0" />
-       <Label fx:id="eDateLabel" layoutX="670.0" layoutY="360.0" text="End Date:" />
-       <DatePicker fx:id="eDateSelector" disable="true" layoutX="764.0" layoutY="356.0" />
-       <Label fx:id="eTimeLabel" layoutX="670.0" layoutY="402.0" text="End Time:" />
-      <ComboBox fx:id="eTimeCombo" disable="true" layoutX="764.0" layoutY="398.0" prefWidth="150.0" />
-      <Label fx:id="customerLabel" layoutX="670.0" layoutY="446.0" text="Customer ID:" />
-      <ComboBox fx:id="customerCombo" disable="true" layoutX="764.0" layoutY="442.0" prefWidth="150.0" />
-       <Label fx:id="errorLabel" visible="false" layoutX="360.0" layoutY="314.0" textFill="#c41212" />
-      <Button fx:id="saveButton" disable="true" layoutX="449.0" layoutY="541.0" mnemonicParsing="false" text="Save" onMouseClicked="#saveClicked" />
-   </children>
+    <children>
+        <Label layoutX="25.0" layoutY="52.0" text="Search All Appointments:" />
+        <TextField fx:id="searchField" layoutX="171.0" layoutY="48.0" promptText="Search Text" onKeyTyped="#searchFieldTyped" />
+        <Label fx:id="headingLabel" layoutX="374.0" layoutY="26.0" text="Scheduled Appointments">
+          <font>
+             <Font name="System Bold" size="16.0" />
+          </font>
+        </Label>
+        <TableView fx:id="appointTable" layoutX="23.0" layoutY="78.0" prefHeight="200.0" prefWidth="892.0">
+            <columns>
+                <TableColumn fx:id="appointIdCol" prefWidth="102.4000244140625" text="Appointment ID" />
+                <TableColumn fx:id="titleCol" prefWidth="48.0" text="Title" />
+                <TableColumn fx:id="descrCol" prefWidth="75.0" text="Description" />
+                <TableColumn fx:id="locCol" prefWidth="80.80006408691406" text="Location" />
+                <TableColumn fx:id="contactCol" prefWidth="68.800048828125" text="Contact" />
+                <TableColumn fx:id="typeCol" prefWidth="79.99993896484375" text="Type" />
+                <TableColumn fx:id="sDateTimeCol" prefWidth="149.60003662109375" text="Start Date/Time" />
+                <TableColumn fx:id="eDateTimeCol" prefWidth="133.5999755859375" text="End Date/Time" />
+                <TableColumn fx:id="custIdCol" prefWidth="84.800048828125" text="Customer ID" />
+                <TableColumn fx:id="userIdCol" prefWidth="65.599853515625" text="User ID" />
+            </columns>
+        </TableView>
+        <Button fx:id="backButton" layoutX="23.0" layoutY="297.0" mnemonicParsing="false" onMouseClicked="#backClicked" text="Back" />
+        <Button fx:id="addButton" layoutX="727.0" layoutY="297.0" mnemonicParsing="false" onMouseClicked="#addClicked" text="Add" />
+        <Button fx:id="updateButton" layoutX="786.0" layoutY="297.0" mnemonicParsing="false" onMouseClicked="#updateClicked" text="Update" />
+        <Button fx:id="deleteButton" layoutX="865.0" layoutY="297.0" mnemonicParsing="false" onMouseClicked="#deleteClicked" text="Delete" />
+        <Label fx:id="appointmentLabel" layoutX="23.0" layoutY="360.0" text="Appointment ID:" />
+        <TextField fx:id="appointmentField" disable="true" layoutX="135.0" layoutY="356.0" />
+        <Label fx:id="titleLabel" layoutX="23.0" layoutY="402.0" text="Title:" />
+        <TextField fx:id="titleField" disable="true" layoutX="135.0" layoutY="398.0" />
+        <Label fx:id="descriptionLabel" layoutX="23.0" layoutY="446.0" text="Description:" />
+        <TextField fx:id="descriptionField" disable="true" layoutX="136.0" layoutY="442.0" />
+        <Label fx:id="locationLabel" layoutX="25.0" layoutY="494.0" text="Location:" />
+        <TextField fx:id="locationField" disable="true" layoutX="137.0" layoutY="490.0" />
+        <Label fx:id="contactLabel" layoutX="366.0" layoutY="360.0" text="Contact:" />
+        <ComboBox fx:id="contactCombo" disable="true" layoutX="438.0" layoutY="356.0" prefWidth="150.0" />
+        <Label fx:id="typeLabel" layoutX="367.0" layoutY="402.0" text="Type:" />
+        <TextField fx:id="typeField" disable="true" layoutX="438.0" layoutY="398.0" />
+        <Label fx:id="sDateLabel" layoutX="368.0" layoutY="446.0" text="Start Date:" />
+        <DatePicker fx:id="sDateSelector" disable="true" layoutX="438.0" layoutY="442.0" />
+        <Label fx:id="sTimeLabel" layoutX="368.0" layoutY="494.0" text="Start Time:" />
+        <ComboBox fx:id="sTimeCombo" disable="true" layoutX="438.0" layoutY="490.0" prefWidth="150.0" />
+        <Label fx:id="eDateLabel" layoutX="670.0" layoutY="360.0" text="End Date:" />
+        <DatePicker fx:id="eDateSelector" disable="true" layoutX="764.0" layoutY="356.0" />
+        <Label fx:id="eTimeLabel" layoutX="670.0" layoutY="402.0" text="End Time:" />
+        <ComboBox fx:id="eTimeCombo" disable="true" layoutX="764.0" layoutY="398.0" prefWidth="150.0" />
+        <Label fx:id="customerLabel" layoutX="670.0" layoutY="446.0" text="Customer ID:" />
+        <ComboBox fx:id="customerCombo" disable="true" layoutX="764.0" layoutY="442.0" prefWidth="150.0" />
+        <Label fx:id="errorLabel" layoutX="360.0" layoutY="314.0" textFill="#c41212" visible="false" />
+        <Button fx:id="saveButton" disable="true" layoutX="449.0" layoutY="541.0" mnemonicParsing="false" onMouseClicked="#saveClicked" text="Save" />
+    </children>
 </AnchorPane>

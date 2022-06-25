@@ -52,5 +52,10 @@ public class ConfirmDeleteController {
         cancelButton.setText(msg.getString("Cancel"));
         confirmLabel.setText(msg.getString("SureDelete"));
         warningLabel.setText(msg.getString("WarnDelete"));
+        User user = dba.getCurrentUser();
+        if (user instanceof Rep) {
+            confirmButton.setVisible(false);
+            confirmLabel.setText("You are not authorized to delete Customer Records");
+        }
     }
 }

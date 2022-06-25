@@ -88,14 +88,34 @@ public final class AppointmentsDatabaseAccessor {
         return this.appointments;
     }
 
+    public ObservableList<Appointments> lookupAppointments(String query) {
+        List<Appointments> results = new ArrayList<>();
+        ObservableList<Appointments> searchResults = FXCollections.observableList(results);
+        if (this.appointments.isEmpty()) { getAllAppointments(); }
+        for (Appointments a : this.appointments) {
+            if (a.matches(query)) {
+                searchResults.add(a);
+            }
+        }
+        return searchResults;
+    }
+
     /**
      * Gets a list of all appointments this week
      * @return ObservableList of Appointment Objects
      */
-    public ObservableList<Appointments> getWeekAppointments() {
+    public ObservableList<Appointments> getWeekAppointments(User user) {
+        List<Appointments> appointList = new ArrayList<>();
+        ObservableList<Appointments> userAppoint = FXCollections.observableList(appointList);
+        if (user instanceof Admin) {
+            userAppoint = this.appointments;
+        }
+        if (user instanceof Rep) {
+            userAppoint = getAppointmentsByContactID(((Rep) user).getContactID());
+        }
         List<Appointments> list = new ArrayList<>();
         ObservableList<Appointments> weekAppoint = FXCollections.observableList(list);
-        for (Appointments a : this.appointments) {
+        for (Appointments a : userAppoint) {
             LocalDate aDate = LocalDate.parse(a.getStart().substring(0, 10));
             if (aDate.getYear() == LocalDate.now().getYear() &&
                     aDate.get(ChronoField.ALIGNED_WEEK_OF_YEAR) == LocalDate.now().get(ChronoField.ALIGNED_WEEK_OF_YEAR)) {
@@ -109,10 +129,18 @@ public final class AppointmentsDatabaseAccessor {
      * Gets a list of all appointments this month
      * @return ObservableList of Appointment objects
      */
-    public ObservableList<Appointments> getMonthAppointments() {
+    public ObservableList<Appointments> getMonthAppointments(User user) {
+        List<Appointments> appointList = new ArrayList<>();
+        ObservableList<Appointments> userAppoint = FXCollections.observableList(appointList);
+        if (user instanceof Admin) {
+            userAppoint = this.appointments;
+        }
+        if (user instanceof Rep) {
+            userAppoint = getAppointmentsByContactID(((Rep) user).getContactID());
+        }
         List<Appointments> list = new ArrayList<>();
         ObservableList<Appointments> monthAppoint = FXCollections.observableList(list);
-        for (Appointments a : appointments) {
+        for (Appointments a : userAppoint) {
             LocalDate aDate = LocalDate.parse(a.getStart().substring(0, 10));
             if (aDate.getYear() == LocalDate.now().getYear() &&
                     aDate.getMonth() == LocalDate.now().getMonth()) {

@@ -174,6 +174,27 @@ public class Appointments {
     public void setType(String type) { this.type = type; }
 
     /**
+     * A search helper function
+     * @param query
+     * @return true if any part of query is in Appointment object
+     */
+    public boolean matches(String query) {
+        boolean match = false;
+        try {
+            int i = Integer.parseInt(query);
+            if (i == appointmentID || i == customerID || i == userID || i == contactID) {
+                match = true;
+            }
+        } catch (NumberFormatException e) {
+            if (title.contains(query) || description.contains(query) || location.contains(query) ||
+            type.contains(query) || start.contains(query) || end.contains(query)) {
+                match = true;
+            }
+        }
+        return match;
+    }
+
+    /**
      * Constructor for Appointment object
      * @param appointID integer identifying Appointment object
      * @param title String name of Appointment

@@ -1,6 +1,7 @@
 package com.example.c195;
 
 
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -11,6 +12,8 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.time.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import static java.time.temporal.ChronoUnit.HOURS;
@@ -31,6 +34,7 @@ public class AppointmentController {
     private ResourceBundle msg;
     private StageSwitcher switcher;
     private ObservableList<Appointments> appointments;
+    private User user;
 
 
     //FXML stuff
@@ -65,6 +69,7 @@ public class AppointmentController {
     @FXML private Label errorLabel;
 
     //Text Fields
+    @FXML private TextField searchField;
     @FXML private TextField appointmentField;
     @FXML private TextField titleField;
     @FXML private TextField descriptionField;
@@ -106,13 +111,19 @@ public class AppointmentController {
         descriptionField.setDisable(disabled);
         locationField.setDisable(disabled);
         typeField.setDisable(disabled);
-        contactCombo.setDisable(disabled);
         sDateSelector.setDisable(disabled);
         sTimeCombo.setDisable(disabled);
         eDateSelector.setDisable(disabled);
         eTimeCombo.setDisable(disabled);
         customerCombo.setDisable(disabled);
         saveButton.setDisable(disabled);
+
+        if (user instanceof Rep) {
+            contactCombo.setDisable(true);
+        }
+        if (user instanceof Admin) {
+            contactCombo.setDisable(disabled);
+        }
     }
 
     /**
@@ -126,6 +137,13 @@ public class AppointmentController {
         contactCombo.getItems().clear();
         for (Contact c : contacts)
             contactCombo.getItems().add(c.getName());
+        if (user instanceof Rep) {
+            String name = "";
+            for (Contact c : ada.getContactList())
+                if (c.getID() == ((Rep) user).getContactID())
+                    name = c.getName();
+            contactCombo.getSelectionModel().select(name);
+        }
         ObservableList<Customer> customers = cda.getAllCustomers();
         customerCombo.getItems().clear();
         for (Customer c : customers)
@@ -160,6 +178,7 @@ public class AppointmentController {
         appointmentField.setText(Integer.toString(ada.getNewAppointmentID()));
         disableFields(false);
         populateCombos();
+
     }
 
     /**
@@ -217,10 +236,22 @@ public class AppointmentController {
      * and fill it out with selected appointment
      */
     @FXML private void updateClicked() {
-        if (appointTable.getSelectionModel().getSelectedItem() != null) {
-            disableFields(false);
-            populateCombos();
-            setFields();
+        if (user instanceof Rep) {
+            if (appointTable.getSelectionModel().getSelectedItem() != null) {
+                if (appointTable.getSelectionModel().getSelectedItem().getContactID() == ((Rep) user).getContactID()) {
+                    disableFields(false);
+                    populateCombos();
+                    setFields();
+                } else {
+                    errorLabel.setText("You are not authorized to change other user's appointments");
+                }
+            }
+        } else if (user instanceof Admin) {
+            if (appointTable.getSelectionModel().getSelectedItem() != null) {
+                disableFields(false);
+                populateCombos();
+                setFields();
+            }
         }
     }
 
@@ -449,6 +480,18 @@ public class AppointmentController {
         }
     }
 
+    @FXML private void searchFieldTyped() {
+        List<Appointments> appointmentsList = new ArrayList<>();
+        ObservableList<Appointments> appointmentResults = FXCollections.observableList(appointmentsList);
+        String query = searchField.getText();
+        if (query != null) {
+            appointmentResults.addAll(ada.lookupAppointments(query));
+            appointTable.getItems().setAll(appointmentResults);
+        } else {
+            appointTable.getItems().setAll(ada.getAllAppointments());
+        }
+    }
+
     /**
      * This method loads the interface in either English or French with English as default
      */
@@ -489,6 +532,7 @@ public class AppointmentController {
         ada = AppointmentsDatabaseAccessor.getInstance();
         cda = CustomerDatabaseAccessor.getInstance();
         msg = dba.getMsg();
+        user = dba.getCurrentUser();
         switcher = StageSwitcher.getInstance();
         localize();
         appointments = ada.getAllAppointments();

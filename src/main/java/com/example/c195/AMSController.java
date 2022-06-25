@@ -166,8 +166,8 @@ public class AMSController {
         msg = dba.getMsg();
         localize();
         switcher = StageSwitcher.getInstance();
-        weekAppoint = ada.getWeekAppointments();
-        ObservableList<Appointments> monthAppoint = ada.getMonthAppointments();
+        weekAppoint = ada.getWeekAppointments(dba.getCurrentUser());
+        ObservableList<Appointments> monthAppoint = ada.getMonthAppointments(dba.getCurrentUser());
 
         //Set up Table 1
         appointCol.setCellValueFactory(new PropertyValueFactory<>("appointmentID"));
