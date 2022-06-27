@@ -186,8 +186,10 @@ public class Appointments {
                 match = true;
             }
         } catch (NumberFormatException e) {
-            if (title.contains(query) || description.contains(query) || location.contains(query) ||
-            type.contains(query) || start.contains(query) || end.contains(query)) {
+            String q = query.toLowerCase();
+            if (title.toLowerCase().contains(q) || description.toLowerCase().contains(q) ||
+                    location.toLowerCase().contains(q) || type.toLowerCase().contains(q) ||
+                    start.toLowerCase().contains(q) || end.toLowerCase().contains(q)) {
                 match = true;
             }
         }

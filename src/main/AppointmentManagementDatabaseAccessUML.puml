@@ -1,0 +1,95 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+class SeeModel
+
+class DBAccessor {
+- String path
+- String username
+- String pass
+- ZoneId zone
+- ResourceBundle bundle
+- SimpleDateFormat format
+- File loginFile
+- User currentUser
+- int newUserId
+- final static DBAccessor INSTANCE
++ static getInstance(): DBAccessor
++ getPath(): String
++ getUsername(): String
++ getPass(): String
++ getNewUserId(): int
+- setNewUserId(): void
++ getZone(): ZoneId
++ getMsg(): ResourceBundle
+- write(String): void
++ userExists(String): boolean
++ userPass(String, String): boolean
++ getCurrentUser(): User
++ updateUser(String, int): void
++ addUser(User, String): void
++ addContact(Contact, String): void
+- convertToUTC(LocalDateTime): LocalDateTime
++ getTypeReport(): ObservableList<TypeReport>
++ getScheduleReport(): ObservableList<Appointments>
++ getUserReport(): ObservableList<UserReport>
+queryDatabase(String, Connection): ResultSet
+}
+
+class AppointmentsDatabaseAccessor {
+- DBAccessor dba
+- ObservableList<Appointments> appointments
+- Appointments selectedAppointment
+- ObservableList<LocalTime> times
+- final static AppointmentsDatabaseAccessor INSTANCE
++ static getInstance(): AppointmentsDatabaseAccessor
++ convertFromUTC(LocalDateTime): LocalDateTime
++ getAllAppointments(): ObservableList<Appointments>
++ lookupAppointments(String): ObservableList<Appointments>
++ getWeekAppointments(User): ObservableList<Appointments>
++ getMonthAppointments(User): ObservableList<Appointments>
++ deleteAppointment(Appointments): void
++ setSelectedAppointment(Appointments): void
++ setNewAppointment(Appointments): void
++ convertToUTC(LocalDateTime): LocalDateTime
++ replaceSelectedAppointment(Appointments): void
++ getSelectedAppointment(): Appointments
++ clearSelectedAppointment(): void
++ getNewAppointmentID(): int
++ getAppointmentByID(int): Appointments
++ getAppointmentsByCustomerID(int): ObservableList<Appointments>
++ getAppointmentsByContactID(int): ObservableList<Appointments>
+- setTimes(): void
++ getTimes(): ObservableList<LocalTime>
++ getContactList(): ObservableList<Contact>
+
+}
+
+class CustomerDatabaseAccessor {
+- DBAccessor dba
+- AppointmentsDatabaseAccessor ada
+- ObservableList<Customer> customers
+- int customerID
+- Customer selectedCustomer
+- ObservableList<Divisions> divisions
+- ObservableList<Countries> countries
+- final static CustomerDatabaseAccessor INSTANCE
++ static getInstance(): CustomerDatabaseAccessor
++ getCountries(): ObservableList<Countries>
++ getDivisions(): ObservableList<Divisions>
++ getAllCustomers(): ObservableList<Customer>
++ deleteCustomer(Customer): void
++ addCustomer(Customer): void
++ updateCustomer(Customer, Customer): void
++ setSelectedCustomer(Customer): void
++ getNewCustomerID(): int
+}
+
+DBAccessor --R-> SeeModel
+AppointmentsDatabaseAccessor --R-> SeeModel
+AppointmentsDatabaseAccessor -L-> DBAccessor
+CustomerDatabaseAccessor --R-> SeeModel
+CustomerDatabaseAccessor ---> AppointmentsDatabaseAccessor
+CustomerDatabaseAccessor --L-> DBAccessor
+
+@enduml

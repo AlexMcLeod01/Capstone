@@ -1,0 +1,82 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+class User {
+- String name
+- int ID
+}
+class Rep {
+- int contactID
+}
+class Admin
+
+User <|- Rep
+User <|-- Admin
+
+class Appointments {
+- int appointmentID
+- String title
+- String description
+- String location
+- String type
+- String start
+- String end
+- int customerID
+- int userID
+- int contactID
++ matches(String): boolean
+}
+
+class Contact {
+- String name
+- int ID
+}
+
+class Customer {
+- int ID
+- String name
+- String add
+- String post
+- String phone
+-String div
+-String country
+}
+
+Appointments --> User
+Appointments --> Contact
+Appointments -> Customer
+
+class Divisions {
+- int id
+- String name
+- int cID
+}
+
+class Countries {
+- int id
+- String name
+}
+
+Customer --> Divisions
+Customer ---> Countries
+Divisions --> Countries
+
+class TypeReport {
+- String type
+- String month
+- int number
+}
+
+TypeReport -> Appointments
+
+class UserReport {
+- int id
+- String type
+- String month
+- int num
+}
+
+UserReport -> User
+UserReport -> Appointments
+
+@enduml

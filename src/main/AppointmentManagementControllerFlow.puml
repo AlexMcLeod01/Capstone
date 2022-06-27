@@ -1,0 +1,23 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+class C195App
+class LoginFormController
+class NewUserController
+class AMSController
+class CustomerController
+class ConfirmDeleteController
+class AppointmentController
+class ConfirmAppointmentDeleteController
+class ReportsController
+
+C195App -> LoginFormController
+LoginFormController <--> NewUserController
+LoginFormController -> AMSController
+AMSController <---> CustomerController
+AMSController <--> AppointmentController
+AMSController <-> ReportsController
+CustomerController <-> ConfirmDeleteController
+AppointmentController <-> ConfirmAppointmentDeleteController
+
+@enduml
